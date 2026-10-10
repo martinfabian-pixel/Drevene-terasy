@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env*
+!.env.example
+*.tsbuildinfo
+qa/
+scripts/prepare-assets.cjs
+scripts/offline-export.cjs
+scripts/qa-offline.cjs
+scripts/qa-source.cjs
