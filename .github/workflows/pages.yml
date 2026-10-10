@@ -22,6 +22,8 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: TypeScript and production build
         run: npm run build
+      - name: Audit every article and exact PDF gross price
+        run: npm run test:stock
       - name: Verify deterministic geometry and stock calculations
         run: npm run test:engine
       - name: Verify commerce logic and backend security

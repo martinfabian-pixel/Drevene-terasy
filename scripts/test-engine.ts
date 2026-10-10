@@ -1,3 +1,5 @@
+import { runStockManifestImportTests } from './test-stock-manifest-import';
+import { runPlannerStockTests } from './test-planner-stock';
 import { calculatePlan, DEMO_RULES, optimizeStock, pointInPolygon, polygonArea, ribbonParts, shapeOutline,
   validateGeometry, type EngineProduct, type PlanInput } from '../src/engine';
 
@@ -273,3 +275,7 @@ let passed=0;const failures:{name:string;error:string}[]=[];
 for(const t of tests){try{t.run();passed++;}catch(error){failures.push({name:t.name,error:String(error)});}}
 console.log(JSON.stringify({suite:'terrace-engine',passed,failed:failures.length,failures},null,2));
 if(failures.length)throw new Error(`${failures.length} terrace engine tests failed`);
+
+console.log(JSON.stringify(runPlannerStockTests(), null, 2));
+
+console.log(JSON.stringify(runStockManifestImportTests(), null, 2));

@@ -148,9 +148,9 @@ function PlannerPreview() {
 
 function Materials() {
   const materials = [
-    { name: 'MASÍVNE DREVO', subtitle: 'AUTENTICKÁ KRÁSA', image: 'material-drevo-2027.webp', kind: 'solid', to: '/produkt/demo-massive' },
-    { name: 'THERMOWOOD', subtitle: 'TEPELNE UPRAVENÉ DREVO', image: 'material-thermo-2027.webp', kind: 'thermo', to: '/produkt/demo-thermo' },
-    { name: 'WPC TERASY', subtitle: 'KOMPOZITNÝ MATERIÁL', image: 'material-wpc-2027.webp', kind: 'wpc', to: '/produkt/demo-wpc' },
+    { name: 'MASÍVNE DREVO', subtitle: 'AUTENTICKÁ KRÁSA', image: 'material-drevo-2027.webp', kind: 'solid', to: '/masivne-drevo' },
+    { name: 'THERMOWOOD', subtitle: 'TEPELNE UPRAVENÉ DREVO', image: 'material-thermo-2027.webp', kind: 'thermo', to: '/thermowood' },
+    { name: 'WPC TERASY', subtitle: 'KOMPOZITNÝ MATERIÁL', image: 'material-wpc-2027.webp', kind: 'wpc', to: '/wpc-terasy' },
     { name: 'PRÍSLUŠENSTVO', subtitle: 'VŠETKO PRE MONTÁŽ', image: 'deck-exploded-2027-v2.webp', kind: 'accessories', to: '/prislusenstvo' },
   ];
   return <section className="arch2027-materials" aria-labelledby="arch2027-materials-title" id="arch2027-materials"><div className="arch2027-materials-copy"><p className="arch2027-section-number">03</p><h2 id="arch2027-materials-title">MATERIÁLY,<br />KTORÉ MAJÚ<br />CHARAKTER</h2><p>Starostlivo vyberané dreviny a moderné WPC materiály pre váš priestor.</p><Link to="/terasove-dosky">OBJAVIŤ VŠETKY MATERIÁLY <Arrow /></Link></div><div className="arch2027-material-tiles">{materials.map(material => <Link key={material.name} to={material.to} className={`arch2027-material-tile arch2027-material-${material.kind}`}><img src={asset(material.image)} alt={`Ilustračný vizuál kategórie ${material.name.toLowerCase()}`} loading="lazy" decoding="async" /><span className="arch2027-material-tile-caption"><strong>{material.name}</strong><small>{material.subtitle}</small></span><span className="arch2027-tile-note">ILUSTRÁCIA · AI</span></Link>)}</div></section>;

@@ -13,7 +13,8 @@
     "test:platform": "node scripts/qa-platform-ci.mjs",
     "test:platform-extra": "node scripts/qa-platform-extra-ci.mjs",
     "test:commerce": "node server/test-commerce.mjs",
-    "test:server": "node server/test.mjs"
+    "test:server": "node server/test.mjs",
+    "test:stock": "node scripts/verify-stock-program.mjs"
   },
   "dependencies": {
     "react": "19.2.0",

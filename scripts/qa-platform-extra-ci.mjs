@@ -9,6 +9,14 @@ import { chromium, webkit } from 'playwright';
 // This serves the actual Vite production build. No React, router, storage or
 // Three mocks are used. Synthetic contacts/images exist only in isolated tests.
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
+const stock = JSON.parse(await readFile(join(root, 'src', 'data', 'jaf-stock-2026-10-10.json'), 'utf8'));
+const fixtures = JSON.parse(await readFile(join(root, 'scripts', 'qa-stock-fixtures.json'), 'utf8'));
+const board = fixtures.find(row => row.articleNumber === '55990/2640');
+assert.ok(board);
+const productRoute = `/produkt/${board.productId}`;
+assert.equal(fixtures.length, 137);
+assert.equal(new Set(fixtures.map(row => row.productId)).size, 83);
+assert.equal(stock.articles.reduce((sum, article) => sum + article.priceGrossCents, 0), 495999);
 const dist = join(root, 'dist');
 const output = join(root, 'qa', 'ci-platform-extra');
 await mkdir(output, { recursive: true });
@@ -93,10 +101,55 @@ const hash = buffer => createHash('sha256').update(buffer).digest('hex');
 try {
   browser = await chromium.launch({ headless: true, args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 
+  await check('every public stock variant matches all 137 PDF article prices, units, rebates and stock-program labels', async () => {
+    const page = await newPage();
+    const groups = new Map(); for (const fixture of fixtures) { if (!groups.has(fixture.productId)) groups.set(fixture.productId, []); groups.get(fixture.productId).push(fixture); }
+    let reviewed = 0, clearance = 0;
+    for (const [productId, group] of groups) {
+      await open(page, `/produkt/${productId}`, page.getByRole('heading', { level: 1, name: group[0].productName, exact: true }));
+      assert.equal(await page.getByTestId('product-variant').locator('option').count(), group.length);
+      assert.equal(await page.getByRole('heading', { level: 1 }).innerText(), group[0].productName);
+      for (const fixture of group) {
+        const source = stock.articles.find(article => article.article === fixture.articleNumber); assert.ok(source);
+        await page.getByTestId('product-variant').selectOption(fixture.variantId); await waitValue(page.getByTestId('product-variant'), fixture.variantId);
+        await page.waitForFunction(article => document.querySelector('.platform-article-meta')?.textContent.includes(`ARTIKEL ${article} /`), source.article);
+        const price = await page.locator('.platform-price').evaluate(element => element.firstChild.textContent.replace(/\s/g, ''));
+        const expectedMoney = new Intl.NumberFormat('sk-SK', { style: 'currency', currency: 'EUR' }).format(source.priceGrossCents / 100).replace(/\s/g, '');
+        assert.equal(price, `${expectedMoney}/${source.salesUnit}`, `${source.article}: authoritative whole-unit gross price`);
+        assert.match(await page.locator('.platform-article-meta').innerText(), new RegExp(`RS ${source.rebateGroup} / STRANA ${source.page}`));
+        assert.equal(await page.getByTestId('stock-program-status').locator('strong').innerText(), source.stockStatus);
+        assert.match(await page.getByTestId('stock-program-status').innerText(), /nie potvrdená aktuálna dostupnosť/);
+        if (source.stockStatus === 'Skladom do vypredania zásob') clearance++;
+        if (source.referenceUnit === 'bm') {
+          const expectedInfo = new Intl.NumberFormat('sk-SK', { style: 'currency', currency: 'EUR' }).format(source.referenceGrossCents / 100).replace(/\s/g, '');
+          const info = await page.locator('.platform-area-note').first().innerText(); assert.ok(info.replace(/\s/g, '').startsWith(`${expectedInfo}/bm`));
+        }
+        reviewed++;
+      }
+    }
+    assert.equal(reviewed, 137); assert.equal(clearance, 13); assert.equal(groups.size, 83);
+    return { articlesReviewed: reviewed, groups: groups.size, sellUntilExhausted: clearance, grossChecksumCents: 495999 };
+  });
+
+  await check('whole package prices and source status survive cart export while old demo cart entries are removed', async () => {
+    const page = await newPage();
+    await page.addInitScript(() => localStorage.setItem('drevene-terasy.cart.v1', JSON.stringify({ version: 1, items: [{ key: 'demo-massive:demo-massive-140-4000', productId: 'demo-massive', variantId: 'demo-massive-140-4000', quantity: 5 }] })));
+    await open(page, '/kosik', page.getByRole('heading', { name: 'Košík je prázdny.', exact: true }));
+    const packaged = fixtures.find(row => row.articleNumber === '55013/0277'); assert.ok(packaged);
+    await open(page, `/produkt/${packaged.productId}`, page.getByTestId('product-variant')); await page.getByTestId('product-variant').selectOption(packaged.variantId);
+    assert.match(await page.locator('.platform-product-config').innerText(), /Obsah balenia cenník neuvádza/);
+    await page.getByTestId('product-quantity').fill('2'); await page.getByTestId('product-quantity').fill('1.5'); await waitValue(page.getByTestId('product-quantity'), '2'); await page.getByTestId('product-add-cart').click();
+    await open(page, '/kosik', page.getByTestId('cart-row')); assert.equal(await page.getByTestId('cart-row').count(), 1); assert.match(await page.getByTestId('cart-row').locator('strong').innerText(), /156,22/);
+    const exported = await jsonDownload(page, () => page.getByRole('button', { name: 'EXPORT MATERIÁLOVÉHO ZOZNAMU ↓', exact: true }).click(), 'stock-package-quote.json');
+    assert.equal(exported.lines[0].articleNumber, packaged.articleNumber); assert.equal(exported.lines[0].unit, 'bal'); assert.equal(exported.lines[0].sourceUnit, 'balenie'); assert.equal(exported.lines[0].physicalQuantity, 2); assert.equal(exported.lines[0].saleQuantity, 2); assert.equal(exported.lines[0].priceGross, 78.11); assert.equal(exported.lines[0].subtotalGross, 156.22); assert.equal(exported.lines[0].packageQuantity, null);
+    assert.equal(exported.lines[0].vatRate, null); assert.equal(exported.lines[0].subtotalNet, null); assert.equal(exported.lines[0].availabilityBasis, 'pricelist');
+    return { oldDemoRemoved: true, wholePackages: 2, sourcePricePerPackageEur: 78.11, grossEur: 156.22, piecesPerPackNotInvented: true };
+  });
+
   await check('checkout complete company, billing, shipping, consent and JSON download', async () => {
     const page = await newPage();
-    await open(page, '/produkt/demo-massive', page.getByTestId('product-variant'));
-    await page.getByTestId('product-variant').selectOption('demo-massive-140-4000');
+    await open(page, productRoute, page.getByTestId('product-variant'));
+    await page.getByTestId('product-variant').selectOption(board.variantId);
     await page.getByTestId('product-quantity').fill('3');
     await page.getByTestId('product-add-cart').click();
     await open(page, '/pokladna', page.getByTestId('checkout-export'));
@@ -131,8 +184,8 @@ try {
     assert.equal(exported.version, 1); assert.equal(exported.type, 'quote-draft'); assert.equal(exported.delivery, 'delivery');
     assert.ok(Number.isFinite(Date.parse(exported.createdAt)));
     assert.deepEqual(exported.contact, { ...contact, deliveryMode: 'delivery' });
-    assert.equal(exported.items.length, 1); assert.equal(exported.items[0].variantId, 'demo-massive-140-4000'); assert.equal(exported.items[0].quantity, 3);
-    assert.equal(exported.lines.length, 1); assert.equal(exported.lines[0].variantId, 'demo-massive-140-4000'); assert.deepEqual(exported.lines[0].dimensionsMm, { length: 4000, width: 140, thickness: 26 }); assert.equal(exported.lines[0].physicalQuantity, 3); assert.equal(exported.lines[0].priceGross, null); assert.equal(exported.lines[0].subtotalGross, null);
+    assert.equal(exported.items.length, 1); assert.equal(exported.items[0].variantId, board.variantId); assert.equal(exported.items[0].quantity, 3);
+    assert.equal(exported.lines.length, 1); assert.equal(exported.lines[0].variantId, board.variantId); assert.deepEqual(exported.lines[0].dimensionsMm, { length: 4000, width: 145, thickness: 28 }); assert.equal(exported.lines[0].physicalQuantity, 3); assert.equal(exported.lines[0].priceGross, 23.12); assert.equal(exported.lines[0].subtotalGross, 69.36); assert.equal(exported.lines[0].articleNumber, board.articleNumber); assert.equal(exported.lines[0].vatRate, null); assert.equal(exported.lines[0].priceNet, null);
     assert.match(exported.notice, /Nebol odoslaný/);
     assert.deepEqual(writes, [], 'No customer data may be sent to a server');
     const persisted = await storageText(page);
@@ -148,7 +201,7 @@ try {
 
   await check('checkout personal pickup removes shipping fields from the exported draft', async () => {
     const page = await newPage();
-    await open(page, '/produkt/demo-massive', page.getByTestId('product-add-cart'));
+    await open(page, productRoute, page.getByTestId('product-add-cart'));
     await page.getByTestId('product-add-cart').click();
     await open(page, '/pokladna', page.getByTestId('checkout-export'));
     await page.locator('[name="name"]').fill('CI Pickup Buyer');
@@ -201,114 +254,107 @@ try {
     return { rejectedInvalidProject: true, rejectedInvalidPhoto: true, photos: exported.attachments.length, savedProjectLengthMm: exported.plannerProject.input.outline[1].x, networkWrites: writes.length };
   });
 
-  await check('admin gate, invalid and valid CSV, variants, photo, full JSON, backup and SPA catalog', async () => {
+  await check('admin complete stock CSV review, forbidden article rejection, price/photo draft and immutable public catalog', async () => {
     const page = await newPage();
     await open(page, '/admin', page.getByRole('button', { name: 'OTVORIŤ LOKÁLNE DEMO →', exact: true }));
-    assert.equal(await page.locator('.platform-admin-products aside select').count(), 0, 'Gate must precede editable demo data');
+    assert.equal(await page.locator('.platform-admin-products aside select').count(), 0);
     assert.equal(await page.locator('.platform-admin-gate').count(), 1);
     await page.getByRole('button', { name: 'OTVORIŤ LOKÁLNE DEMO →', exact: true }).click();
-    await page.locator('.platform-admin-products aside select').waitFor();
-    const originalCount = await page.locator('.platform-admin-products aside select').locator('option').count();
+    const productSelect = page.getByLabel('Vybrať produkt', { exact: true });
+    await productSelect.waitFor();
+    const originalCount = await productSelect.locator('option').count();
+    assert.equal(originalCount, 83);
+    assert.equal(await page.getByLabel('Názov podľa PDF', { exact: true }).getAttribute('readonly'), '');
+    assert.equal(await page.getByRole('button', { name: /Pridať produkt|Pridať variant/i }).count(), 0);
     await page.getByRole('button', { name: 'Objednávky a dopyty', exact: true }).click();
     await page.getByRole('heading', { name: 'Produkčné dáta sú chránené.', exact: true }).waitFor();
+    const downloading = page.waitForEvent('download');
+    await page.getByRole('button', { name: 'EXPORTOVAŤ NÁVRH CSV ↓', exact: true }).click();
+    const downloaded = await downloading; assert.equal(await downloaded.failure(), null);
+    await downloaded.saveAs(join(output, 'admin-approved-stock.csv')); report.artifacts.push('admin-approved-stock.csv');
+    const csv = await readFile(join(output, 'admin-approved-stock.csv'), 'utf8');
+    const parseCsv = source => { const rows = []; let row = [], cell = '', quoted = false; for (let i = 0; i < source.length; i++) { const c = source[i]; if (c === '"') { if (quoted && source[i + 1] === '"') { cell += '"'; i++; } else quoted = !quoted; } else if (!quoted && c === ';') { row.push(cell); cell = ''; } else if (!quoted && (c === '\n' || c === '\r')) { if (c === '\r' && source[i + 1] === '\n') i++; row.push(cell); if (row.some(Boolean)) rows.push(row); row = []; cell = ''; } else cell += c; } row.push(cell); if (row.some(Boolean)) rows.push(row); assert.equal(quoted, false); return rows; };
+    const rows = parseCsv(csv), columns = rows[0]; assert.equal(rows.length - 1, 137);
+    const serializeCsv = data => data.map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(';')).join('\n') + '\n';
+    const articleColumn = columns.indexOf('article_number'), priceColumn = columns.indexOf('price_gross_eur'); assert.ok(articleColumn >= 0 && priceColumn >= 0);
+    const firstSource = rows.find(row => row[articleColumn] === board.articleNumber); assert.ok(firstSource);
     await page.getByRole('button', { name: 'CSV import', exact: true }).click();
-    const columns = ['product_id', 'name', 'category', 'manufacturer', 'wood_species', 'surface', 'variant_id', 'length_mm', 'width_mm', 'thickness_mm', 'profile', 'color', 'unit', 'price_gross_eur', 'vat_percent', 'availability', 'technical_sheet', 'source_url'];
-    const row = overrides => columns.map(key => `"${String(({ product_id: 'ci-board', name: 'CI imported terrace · DEMO', category: 'massive', variant_id: 'ci-board-4000', length_mm: 4000, width_mm: 145, thickness_mm: 28, profile: 'Hladký CI', color: 'Prírodný CI', unit: 'ks', price_gross_eur: 12.3, vat_percent: 23, ...overrides })[key] ?? '').replaceAll('"', '""')}"`).join(';');
-    const invalid = `${columns.join(';')}\n${row({ category: 'toString' })}\n`;
-    await page.getByLabel('CSV obsah', { exact: true }).fill(invalid);
-    await page.getByRole('button', { name: 'OVERIŤ A IMPORTOVAŤ LOKÁLNE →', exact: true }).click();
-    await page.getByRole('status').filter({ hasText: 'Neznáma kategória alebo jednotka.' }).waitFor();
+    const forbidden = [...firstSource]; forbidden[columns.indexOf('product_id')] = 'ci-forbidden'; forbidden[columns.indexOf('variant_id')] = 'ci-forbidden-variant'; forbidden[articleColumn] = '99999/9999';
+    await page.getByLabel('CSV obsah', { exact: true }).fill(serializeCsv([...rows, forbidden]));
+    await page.getByRole('button', { name: 'OVERIŤ A PRIPRAVIŤ NÁVRH →', exact: true }).click();
+    await page.getByRole('status').filter({ hasText: /nie je.*schválen|nie je.*skladového|artikel nie je.*skladov/i }).waitFor();
     await page.getByRole('button', { name: 'Produkty a varianty', exact: true }).click();
-    assert.equal(await page.locator('.platform-admin-products aside select').locator('option').count(), originalCount);
-    assert.equal(await page.locator('.platform-admin-products aside select').locator('option[value="ci-board"]').count(), 0);
+    assert.equal(await productSelect.locator('option').count(), originalCount);
+    assert.equal(await productSelect.locator('option[value="ci-forbidden"]').count(), 0);
     await page.getByRole('button', { name: 'CSV import', exact: true }).click();
-    const csv = `${columns.join(';')}\n${row({})}\n${row({ variant_id: 'ci-board-5000', length_mm: 5000, price_gross_eur: '', vat_percent: '' })}\n${row({ product_id: 'ci-area-board', name: 'CI Area Board · DEMO', variant_id: 'ci-area-4000', width_mm: 140, unit: 'm²', price_gross_eur: 10, vat_percent: 23 })}\n`;
-    await page.getByLabel('Vybrať CSV', { exact: true }).setInputFiles({ name: 'ci-products.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
-    await waitValue(page.getByLabel('CSV obsah', { exact: true }), csv);
-    await page.getByRole('button', { name: 'OVERIŤ A IMPORTOVAŤ LOKÁLNE →', exact: true }).click();
-    await page.getByRole('status').filter({ hasText: '2 produktov importovaných iba do lokálneho demo stavu.' }).waitFor();
+    await page.getByLabel('CSV obsah', { exact: true }).fill(serializeCsv([columns, firstSource]));
+    await page.getByRole('button', { name: 'OVERIŤ A PRIPRAVIŤ NÁVRH →', exact: true }).click();
+    await page.getByRole('status').filter({ hasText: /Chýba artikel/ }).waitFor();
+    const draftRows = rows.map(row => [...row]); draftRows.find(row => row[articleColumn] === board.articleNumber)[priceColumn] = '30.00';
+    const draftCsv = serializeCsv(draftRows);
+    await page.getByLabel('Vybrať CSV', { exact: true }).setInputFiles({ name: 'ci-stock-update.csv', mimeType: 'text/csv', buffer: Buffer.from(draftCsv) });
+    await waitValue(page.getByLabel('CSV obsah', { exact: true }), draftCsv);
+    await page.getByRole('button', { name: 'OVERIŤ A PRIPRAVIŤ NÁVRH →', exact: true }).click();
+    await page.getByRole('status').filter({ hasText: /Overených 137 artiklov.*1 cenových zmien/ }).waitFor();
+    await page.getByRole('heading', { name: /CENOVÉ ZMENY NA KONTROLU \/ 1/ }).waitFor();
     await page.getByRole('button', { name: 'Produkty a varianty', exact: true }).click();
-    const productSelect = page.locator('.platform-admin-products aside select');
-    await waitValue(productSelect, 'ci-board');
-    assert.equal(await productSelect.locator('option').count(), originalCount + 2);
-    const editedName = 'CI upravená terasa · DEMO';
-    await page.getByLabel('Názov', { exact: true }).fill(editedName);
-    await page.getByLabel('Výrobca', { exact: true }).fill('CI Synthetic Manufacturer');
-    await page.getByLabel('Cena s DPH · demo', { exact: true }).first().fill('19.68');
-    await page.getByLabel('DPH · %', { exact: true }).first().fill('23');
-    await page.getByLabel('Dostupnosť', { exact: true }).first().fill('DEMO – availability unverified');
-    const variantFields = page.locator('fieldset').filter({ has: page.getByText('ci-board-4000', { exact: true }) });
-    const profileInput = variantFields.getByLabel('Profil', { exact: true }); await profileInput.scrollIntoViewIfNeeded(); const editScrollBefore = await page.evaluate(() => scrollY);
-    await profileInput.fill('Hladký CI profil'); await waitValue(profileInput, 'Hladký CI profil'); assert.ok(Math.abs(await page.evaluate(() => scrollY) - editScrollBefore) < 2, 'Editing the catalog must preserve scroll position');
-    await variantFields.getByLabel('Farba', { exact: true }).fill('Grafit CI');
-    await variantFields.getByLabel('Dĺžka mm', { exact: true }).fill('4100');
-    await variantFields.getByLabel('Šírka mm', { exact: true }).fill('145');
-    await variantFields.getByLabel('Hrúbka mm', { exact: true }).fill('28');
-    await variantFields.getByRole('combobox').selectOption('ks');
-    await page.getByLabel('Fotografia · vlastný demo náhľad', { exact: true }).setInputFiles(photo);
-    await page.getByRole('status').filter({ hasText: 'Vložený obrázok pridaný do lokálneho náhľadu.' }).waitFor();
+    await productSelect.selectOption(board.productId); await waitValue(productSelect, board.productId);
+    const photoInput = page.getByLabel('Fotografia · vlastný lokálny návrh', { exact: true });
+    await photoInput.scrollIntoViewIfNeeded(); const scrollBefore = await page.evaluate(() => scrollY);
+    await photoInput.setInputFiles(photo);
+    await page.getByRole('status').filter({ hasText: /Obrázok vložený iba do lokálneho návrhu/ }).waitFor();
     await page.waitForFunction(expected => document.querySelector('.platform-admin-photo-preview')?.getAttribute('src') === expected, expectedPhotoUrl);
-    const exported = await jsonDownload(page, () => page.getByRole('button', { name: 'EXPORTOVAŤ KOMPLETNÉ DEMO JSON ↓', exact: true }).click(), 'admin-full-catalog.json', 'katalog-demo.json');
-    const edited = exported.products.find(product => product.id === 'ci-board');
-    assert.equal(exported.version, 1); assert.equal(exported.products.length, originalCount + 2); assert.equal(edited.name, editedName); assert.equal(edited.status, 'demo');
-    assert.equal(edited.manufacturer, 'CI Synthetic Manufacturer'); assert.deepEqual(edited.images, [expectedPhotoUrl]); assert.equal(edited.variants.length, 2);
-    const selectedVariant = edited.variants.find(variant => variant.id === 'ci-board-4000');
-    assert.deepEqual(Object.fromEntries(['priceGross', 'vatRate', 'lengthMm', 'widthMm', 'thicknessMm', 'profile', 'color', 'unit'].map(key => [key, selectedVariant[key]])), { priceGross: 19.68, vatRate: 23, lengthMm: 4100, widthMm: 145, thicknessMm: 28, profile: 'Hladký CI profil', color: 'Grafit CI', unit: 'ks' });
-    await page.getByRole('button', { name: 'ULOŽIŤ KOMPLETNÉ DEMO LOKÁLNE', exact: true }).click();
-    await page.getByRole('status').filter({ hasText: 'Kompletné demo vrátane fotografií uložené iba v tomto prehliadači.' }).waitFor();
-    assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('drevene-terasy.admin-demo.json.v1'))), exported);
-    await page.getByLabel('Názov', { exact: true }).fill('CI temporary mutation');
-    await page.getByRole('button', { name: 'NAČÍTAŤ KOMPLETNÉ DEMO', exact: true }).click();
-    await page.getByRole('status').filter({ hasText: 'Kompletná lokálna záloha načítaná ako demo.' }).waitFor();
-    await productSelect.selectOption('ci-board');
-    await waitValue(page.getByLabel('Názov', { exact: true }), editedName);
-    await page.getByLabel('Názov', { exact: true }).fill('CI second temporary mutation');
-    await page.getByLabel('Obnoviť JSON zo súboru', { exact: true }).setInputFiles({ name: 'catalog-backup.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(exported)) });
-    await page.getByRole('status').filter({ hasText: 'JSON katalóg obnovený do lokálneho demo stavu.' }).waitFor();
-    await productSelect.selectOption('ci-board');
-    await waitValue(page.getByLabel('Názov', { exact: true }), editedName);
-    assert.equal(await page.locator('.platform-admin-photo-preview').getAttribute('src'), expectedPhotoUrl);
-    const restored = await jsonDownload(page, () => page.getByRole('button', { name: 'EXPORTOVAŤ KOMPLETNÉ DEMO JSON ↓', exact: true }).click(), 'admin-restored-catalog.json');
-    const normalizeProduct = product => ({ ...product, engineRules: product.engineRules ?? null });
-    assert.deepEqual(normalizeProduct(restored.products.find(product => product.id === 'ci-board')), normalizeProduct(edited), 'Full JSON backup must preserve photo and variant data');
-    await screenshot(page, 'admin-restored-demo.png');
-    await page.getByRole('link', { name: 'Otvoriť upravený detail →', exact: true }).click();
-    await page.getByTestId('product-variant').waitFor();
-    assert.equal(await page.getByRole('heading', { level: 1 }).innerText(), 'CI upravená terasa');
-    assert.equal(await page.locator('.platform-detail-image img').getAttribute('src'), expectedPhotoUrl);
-    assert.match(await page.locator('.platform-price').innerText(), /19,68/);
-    await open(page, '/terasove-dosky', page.getByTestId('catalog-search'));
-    await page.getByTestId('catalog-search').fill('CI upravená');
-    await page.getByTestId('product-ci-board').waitFor();
-    assert.equal(await page.locator('.platform-product-grid article').count(), 1);
-    await screenshot(page, 'admin-imported-product-in-catalog.png');
-    await page.getByTestId('catalog-search').fill('CI Area Board');
-    await page.getByTestId('product-ci-area-board').waitFor();
-    assert.match(await page.getByTestId('product-ci-area-board').innerText(), /10,00.*\/ m²/);
-    await page.getByTestId('product-ci-area-board').click();
-    await page.getByTestId('product-quantity').waitFor();
-    await page.getByTestId('product-quantity').fill('3');
-    await page.getByTestId('product-add-cart').click();
-    await open(page, '/kosik', page.getByTestId('cart-row'));
-    assert.equal(await page.getByTestId('cart-row').count(), 1);
-    assert.match(await page.getByTestId('cart-row').locator('strong').innerText(), /16,80/);
-    const areaQuote = await jsonDownload(page, () => page.getByRole('button', { name: 'EXPORT MATERIÁLOVÉHO ZOZNAMU ↓', exact: true }).click(), 'area-material-quote.json'); assert.equal(areaQuote.lines[0].unit, 'm²'); assert.equal(areaQuote.lines[0].physicalQuantity, 3); assert.equal(areaQuote.lines[0].saleQuantity, 1.68); assert.equal(areaQuote.lines[0].subtotalGross, 16.8);
-    return { invalidCsvRejected: true, variants: edited.variants.length, imagePreserved: true, localBackupRestored: true, fileBackupRestored: true, productAvailableDuringSpaNavigation: true, areaUnitGrossEur: 16.8 };
+    assert.ok(Math.abs(await page.evaluate(() => scrollY) - scrollBefore) < 2, 'Draft edits must preserve scroll position');
+    const exported = await jsonDownload(page, () => page.getByRole('button', { name: 'EXPORTOVAŤ NÁVRH JSON ↓', exact: true }).click(), 'admin-stock-draft.json', 'jaf-skladovy-program-navrh.json');
+    assert.equal(exported.version, 1); assert.equal(exported.type, 'stock-update-draft'); assert.equal(exported.publicationRequiresReview, true); assert.equal(exported.products.length, 83);
+    assert.equal(exported.products.reduce((sum, product) => sum + product.variants.length, 0), 137);
+    const edited = exported.products.find(product => product.id === board.productId);
+    assert.equal(edited.name, board.productName); assert.deepEqual(edited.images, [expectedPhotoUrl]); assert.equal(edited.imageKind, 'product'); assert.equal(edited.variants[0].priceGross, 30); assert.equal(edited.variants[0].vatRate, null);
+    await page.getByRole('button', { name: 'ULOŽIŤ NÁVRH LOKÁLNE', exact: true }).click();
+    await page.getByRole('status').filter({ hasText: 'Návrh uložený iba v tomto prehliadači.' }).waitFor();
+    assert.deepEqual(await page.evaluate(() => JSON.parse(localStorage.getItem('drevene-terasy.stock-draft.v1'))), exported);
+    await page.getByRole('button', { name: 'Obnoviť schválený skladový program', exact: true }).click();
+    await page.getByRole('status').filter({ hasText: 'Návrh obnovený zo schváleného cenníka.' }).waitFor();
+    assert.notEqual(await page.locator('.platform-admin-photo-preview').getAttribute('src'), expectedPhotoUrl);
+    await page.getByRole('button', { name: 'NAČÍTAŤ NÁVRH', exact: true }).click();
+    await page.getByRole('status').filter({ hasText: 'Návrh obnovený iba v administrácii.' }).waitFor();
+    await productSelect.selectOption(board.productId);
+    await page.waitForFunction(expected => document.querySelector('.platform-admin-photo-preview')?.getAttribute('src') === expected, expectedPhotoUrl);
+    await page.getByRole('button', { name: 'Obnoviť schválený skladový program', exact: true }).click();
+    await page.getByLabel('Obnoviť JSON zo súboru', { exact: true }).setInputFiles({ name: 'stock-draft.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(exported)) });
+    await page.getByRole('status').filter({ hasText: 'Návrh obnovený iba v administrácii.' }).waitFor();
+    await productSelect.selectOption(board.productId);
+    await page.waitForFunction(expected => document.querySelector('.platform-admin-photo-preview')?.getAttribute('src') === expected, expectedPhotoUrl);
+    const restored = await jsonDownload(page, () => page.getByRole('button', { name: 'EXPORTOVAŤ NÁVRH JSON ↓', exact: true }).click(), 'admin-restored-stock-draft.json');
+    assert.deepEqual(restored.products.find(product => product.id === board.productId), edited);
+    await screenshot(page, 'admin-stock-update-draft.png');
+    await open(page, productRoute, page.getByTestId('product-variant'));
+    assert.equal(await page.getByRole('heading', { level: 1 }).innerText(), board.productName);
+    assert.notEqual(await page.locator('.platform-detail-image img').getAttribute('src'), expectedPhotoUrl);
+    assert.match(await page.locator('.platform-price').innerText(), /23,12/);
+    await page.getByTestId('product-quantity').fill('3'); await page.getByTestId('product-add-cart').click();
+    await open(page, '/kosik', page.getByTestId('cart-row')); assert.match(await page.getByTestId('cart-row').locator('strong').innerText(), /69,36/);
+    const publicQuote = await jsonDownload(page, () => page.getByRole('button', { name: 'EXPORT MATERIÁLOVÉHO ZOZNAMU ↓', exact: true }).click(), 'public-stock-after-draft.json');
+    assert.equal(publicQuote.lines[0].priceGross, 23.12); assert.equal(publicQuote.lines[0].subtotalGross, 69.36); assert.equal(publicQuote.lines[0].articleNumber, board.articleNumber);
+    await open(page, '/terasove-dosky', page.getByTestId('catalog-search')); await page.getByTestId('catalog-search').fill('99999/9999'); await page.getByRole('heading', { name: 'Nič sa nenašlo.', exact: true }).waitFor(); assert.equal(await page.locator('.platform-product-grid article').count(), 0);
+    await open(page, '/planovac', page.getByTestId('planner-page')); await page.getByRole('button', { name: '03 Materiál', exact: true }).click(); await page.getByTestId('planner-product').selectOption(board.productId); await page.getByTestId('planner-variant').selectOption(board.variantId);
+    assert.equal(await page.getByTestId('planner-stock-article-number').innerText(), board.articleNumber); assert.match(await page.getByTestId('planner-stock-price').innerText(), /23,12/); assert.equal(await page.getByTestId('planner-add-cart').isDisabled(), true);
+    return { unapprovedArticleRejected: true, incompleteCsvRejected: true, completeDraftArticles: 137, stagedPriceEur: 30, publicPriceEur: 23.12, photoPreservedInDraft: true, localAndFileBackupsRestored: true, publicPlannerUnaffected: true };
   });
 
   await check('selected product variant survives product-to-planner query and project export', async () => {
     const page = await newPage();
-    await open(page, '/produkt/demo-massive', page.getByTestId('product-variant'));
-    await page.getByTestId('product-variant').selectOption('demo-massive-140-4000');
+    await open(page, productRoute, page.getByTestId('product-variant'));
+    await page.getByTestId('product-variant').selectOption(board.variantId);
     await page.getByRole('link', { name: 'NAVRHNÚŤ S TÝMTO MATERIÁLOM ↗', exact: true }).click();
     await page.getByTestId('planner-page').waitFor();
     const query = new URLSearchParams(page.url().split('?').at(-1));
-    assert.equal(query.get('product'), 'demo-massive'); assert.equal(query.get('variant'), 'demo-massive-140-4000');
+    assert.equal(query.get('product'), board.productId); assert.equal(query.get('variant'), board.variantId);
     await page.getByRole('button', { name: '03 Materiál', exact: true }).click();
-    await waitValue(page.getByTestId('planner-product'), 'demo-massive');
-    await waitValue(page.getByTestId('planner-variant'), 'demo-massive-140-4000');
+    await waitValue(page.getByTestId('planner-product'), board.productId);
+    await waitValue(page.getByTestId('planner-variant'), board.variantId);
     const exported = await jsonDownload(page, () => page.getByRole('button', { name: 'Stiahnuť projekt JSON', exact: true }).click(), 'product-selected-planner.json', 'moja-terasa.json');
-    assert.equal(exported.input.productId, 'demo-massive'); assert.equal(exported.input.variantId, 'demo-massive-140-4000');
+    assert.equal(exported.input.productId, board.productId); assert.equal(exported.input.variantId, board.variantId);
     return { productId: exported.input.productId, variantId: exported.input.variantId };
   });
 
@@ -427,7 +473,9 @@ try {
     const page = await newPage();
     await open(page, '/planovac', page.getByTestId('planner-page'));
     await page.getByRole('button', { name: '06 Výsledok', exact: true }).click();
-    await page.locator('.planner-cuts[open]').first().waitFor();
+    await page.locator('.planner-empty').waitFor();
+    assert.equal(await page.getByTestId('planner-add-cart').isDisabled(), true);
+    assert.equal(await page.locator('.planner-cuts').count(), 0);
     await page.emulateMedia({ media: 'print' });
     const print = await page.evaluate(() => ({
       planVisible: getComputedStyle(document.querySelector('.planner-print-plan')).display !== 'none',
@@ -438,7 +486,7 @@ try {
       hasDisclaimer: document.querySelector('.planner-print-plan').textContent.includes('Nejde o statický posudok'),
     }));
     assert.equal(print.planVisible, true); assert.equal(print.editorHidden, true); assert.equal(print.actionButtonsHidden, true);
-    assert.ok(print.boardPolygons > 1); assert.ok(print.materialRows >= 3); assert.equal(print.hasDisclaimer, true);
+    assert.ok(print.boardPolygons > 1); assert.equal(print.materialRows, 0); assert.equal(print.hasDisclaimer, true);
     const pdf = await page.pdf({ path: join(output, 'planner-technical-report.pdf'), format: 'A4', printBackground: true, preferCSSPageSize: true, margin: { top: '12mm', bottom: '12mm', left: '12mm', right: '12mm' } });
     assert.equal(pdf.subarray(0, 5).toString(), '%PDF-'); assert.ok(pdf.length > 5000);
     report.artifacts.push('planner-technical-report.pdf');
@@ -449,7 +497,7 @@ try {
   await check('actual ReactDOM overview screenshots for artifact and sanctioned log inspection', async () => {
     const desktop = await newPage({ viewport: { width: 1280, height: 900 } });
     await open(desktop, '/terasove-dosky', desktop.getByTestId('catalog-search'));
-    await desktop.getByTestId('product-demo-massive').waitFor();
+    await desktop.getByTestId(`product-${board.productId}`).waitFor();
     await desktop.evaluate(async () => { await Promise.all([...document.images].map(image => image.decode().catch(() => {}))); });
     await screenshot(desktop, 'overview-1280-catalog.png');
     await mobile.getByTestId('planner-scene').scrollIntoViewIfNeeded();
@@ -516,6 +564,28 @@ try {
       }
     } finally { await webkitBrowser.close(); }
     return { engine: 'WebKit, not a physical iPhone', smoke };
+  });
+
+  await check('future machine-generated PDF manifest upload stages exact price changes without public publication', async () => {
+    const page = await newPage({ viewport: { width: 1280, height: 900 } });
+    await open(page, '/admin', page.getByRole('button', { name: 'OTVORIŤ LOKÁLNE DEMO →', exact: true }));
+    await page.getByRole('button', { name: 'OTVORIŤ LOKÁLNE DEMO →', exact: true }).click();
+    await page.getByRole('button', { name: 'CSV import', exact: true }).click();
+    const manifest = JSON.parse(await readFile(join(root, 'src/data/jaf-stock-2026-10-10.json'), 'utf8'));
+    manifest.source.id = 'jaf-stock-test-future'; manifest.source.date = '2026-11-10'; manifest.source.sha256 = 'b'.repeat(64);
+    manifest.articles[0].priceGrossCents = 2500; manifest.articles[0].referenceGrossCents = 600;
+    await page.getByTestId('stock-manifest-upload').setInputFiles({ name: 'future-pricelist-test.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(manifest)) });
+    await page.getByTestId('stock-pending-source').waitFor();
+    assert.match(await page.getByTestId('stock-pending-source').innerText(), /2026-11-10/);
+    const draft = await jsonDownload(page, () => page.getByRole('button', { name: 'EXPORTOVAŤ NÁVRH JSON ↓', exact: true }).click(), 'future-pricelist-draft.json');
+    assert.equal(draft.pendingSource.sha256, 'b'.repeat(64)); assert.equal(draft.publicationRequiresReview, true);
+    const variant = draft.products.flatMap(product => product.variants).find(row => row.articleNumber === board.articleNumber);
+    assert.equal(variant.priceGross, 25); assert.equal(variant.pricePerBmGross, 6);
+    await open(page, '/produkt/'+board.productId, page.getByTestId('product-variant'));
+    assert.match(await page.locator('.platform-price').innerText(), /23,12/);
+    await open(page, '/planovac', page.getByTestId('planner-page'));
+    assert.equal(await page.getByTestId('planner-add-cart').isDisabled(), true);
+    return { updatedDraftGross: 25, publicGross: 23.12, articles: 137, publication: false };
   });
 
   await check('no application runtime or non-WebGL console errors', async () => {

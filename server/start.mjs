@@ -10,5 +10,6 @@ const config = {
 };
 const host = process.env.API_HOST || '127.0.0.1';
 if (process.env.NODE_ENV !== 'production' && !['127.0.0.1', 'localhost', '::1'].includes(host)) throw new Error('Development API must bind to loopback.');
-const { server } = createApi(config);
-server.listen(Number(process.env.API_PORT || 8787), host, () => process.stdout.write('Drevené terasy API ready. Real commerce requires explicit configuration.\n'));
+const { server, ready } = createApi(config);
+await ready;
+server.listen(Number(process.env.API_PORT || 8787), host, () => process.stdout.write('Drevené terasy API ready with the approved PDF catalog. Real commerce stays disabled pending tax, stock and backend review.\n'));

@@ -32,6 +32,15 @@ export function validateInquiry(value) {
   return { name, email, phone: cleanString(contact.phone, 'phone', 40), location: cleanString(contact.location, 'location', 200),
     message: cleanString(contact.message || contact.note, 'message', 5000), dimensions, attachments: safeAttachments, plannerProject };
 }
+function stockSourceProvenance(value) {
+  if (value == null) return null;
+  if (!value || typeof value !== 'object' || Array.isArray(value) || !/^[a-z0-9][a-z0-9_-]{0,79}$/.test(value.id) || !/^\d{4}-\d{2}-\d{2}$/.test(value.date) || !/^[a-f0-9]{64}$/.test(value.sha256) || !Array.isArray(value.pages) || !value.pages.length || value.pages.length > 100 || value.pages.some(page => !Number.isInteger(page) || page < 1 || page > 1000) || new Set(value.pages).size !== value.pages.length) throw new ApiError(400, 'Invalid PDF source provenance.');
+  const result = { id: value.id, title: cleanString(value.title, 'source title', 200, true), date: value.date, sha256: value.sha256, pages: [...value.pages] };
+  if (value.supplier !== undefined) result.supplier = cleanString(value.supplier, 'source supplier', 150, true);
+  if (value.vatRate !== undefined) { if (value.vatRate !== null && (typeof value.vatRate !== 'number' || !Number.isFinite(value.vatRate) || value.vatRate < 0 || value.vatRate > 100)) throw new ApiError(400, 'Invalid source VAT.'); result.vatRate = value.vatRate; }
+  for (const flag of ['pricesIncludeVat', 'liveAvailability']) if (value[flag] !== undefined) { if (typeof value[flag] !== 'boolean') throw new ApiError(400, 'Invalid source flag.'); result[flag] = value[flag]; }
+  return result;
+}
 export function validateProductCatalog(value) {
   if (!Array.isArray(value) || value.length > 5000) throw new ApiError(400, 'Invalid catalog.');
   const ids = new Set(), variantIds = new Set();
@@ -44,8 +53,9 @@ export function validateProductCatalog(value) {
     const technicalSheet = httpsUrl(product.technicalSheet ?? null);
     if (!Array.isArray(product.sourceUrls) || product.sourceUrls.length > 20) throw new ApiError(400, 'Source URLs required.');
     const sourceUrls = product.sourceUrls.map(httpsUrl).filter(Boolean);
-    if (product.status === 'verified' && !sourceUrls.length) throw new ApiError(400, 'Verified products need source provenance.');
-    if (!Array.isArray(product.images) || product.images.length > 6 || product.images.some(image => typeof image !== 'string' || !(/^[a-zA-Z0-9_-]+\.(webp|jpg|jpeg|png)$/.test(image) || /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+=*$/.test(image) && image.length <= 2800000))) throw new ApiError(400, 'Invalid image reference.');
+    const stockSource = stockSourceProvenance(product.stockSource);
+    if (product.status === 'verified' && !sourceUrls.length && !stockSource) throw new ApiError(400, 'Verified products need source provenance.');
+    if (!Array.isArray(product.images) || product.images.length > 6 || product.images.some(image => typeof image !== 'string' || !(/^[a-zA-Z0-9_-]+\.(webp|jpg|jpeg|png|svg)$/.test(image) || /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/]+=*$/.test(image) && image.length <= 2800000))) throw new ApiError(400, 'Invalid image reference.');
     if (!['demo', 'verified'].includes(product.status) || !Array.isArray(product.variants) || !product.variants.length || product.variants.length > 500) throw new ApiError(400, 'Invalid product status or variants.');
     const variants = product.variants.map(variant => {
       if (!variant || !/^[a-z0-9][a-z0-9_-]{0,119}$/.test(variant.id) || variantIds.has(variant.id)) throw new ApiError(400, 'Invalid or duplicate variant ID.');
@@ -54,18 +64,31 @@ export function validateProductCatalog(value) {
       for (const key of ['lengthMm', 'widthMm', 'thicknessMm']) if (variant[key] !== null && (typeof variant[key] !== 'number' || !Number.isFinite(variant[key]) || variant[key] <= 0 || variant[key] > 20000)) throw new ApiError(400, 'Invalid dimensions.');
       if (variant.priceGross !== null && (typeof variant.priceGross !== 'number' || !Number.isFinite(variant.priceGross) || variant.priceGross < 0 || variant.priceGross > 1_000_000)) throw new ApiError(400, 'Invalid price.');
       if (variant.vatRate !== null && (typeof variant.vatRate !== 'number' || !Number.isFinite(variant.vatRate) || variant.vatRate < 0 || variant.vatRate > 100)) throw new ApiError(400, 'Invalid VAT.');
-      if (variant.priceGross !== null && variant.vatRate === null) throw new ApiError(400, 'Price requires VAT rate.');
+      // A published gross pricelist price is valid without an inferred tax rate.
+      // calculateOrder independently requires a confirmed VAT rate and live stock.
       let stock = null;
       if (variant.stock != null) {
         if (!['available', 'preorder', 'unavailable'].includes(variant.stock.status) || typeof variant.stock.availableQuantity !== 'number' || !Number.isFinite(variant.stock.availableQuantity) || variant.stock.availableQuantity < 0 || variant.stock.availableQuantity > 10000000 || variant.unit !== 'l' && !Number.isInteger(variant.stock.availableQuantity)) throw new ApiError(400, 'Invalid structured stock.');
         stock = { status: variant.stock.status, availableQuantity: variant.stock.availableQuantity };
       }
+      const optionalText = (key, maximum = 200) => variant[key] == null ? null : cleanString(variant[key], key, maximum);
+      const articleNumber = optionalText('articleNumber', 20), rebateGroup = optionalText('rebateGroup', 20);
+      if (articleNumber !== null && !/^\d{5}\/\d{4}$/.test(articleNumber) || rebateGroup !== null && !/^R\d{1,5}$/.test(rebateGroup)) throw new ApiError(400, 'Invalid article or rebate metadata.');
+      if (variant.sourcePage != null && (!Number.isInteger(variant.sourcePage) || variant.sourcePage < 1 || variant.sourcePage > 1000)) throw new ApiError(400, 'Invalid source page.');
+      if (variant.sourceUnit != null && !['ks', 'balenie'].includes(variant.sourceUnit)) throw new ApiError(400, 'Invalid source unit.');
+      if (variant.packageQuantity != null && (!Number.isInteger(variant.packageQuantity) || variant.packageQuantity <= 0 || variant.packageQuantity > 100000)) throw new ApiError(400, 'Invalid package quantity.');
+      if (variant.pricePerBmGross != null && (typeof variant.pricePerBmGross !== 'number' || !Number.isFinite(variant.pricePerBmGross) || variant.pricePerBmGross < 0 || variant.pricePerBmGross > 1000000)) throw new ApiError(400, 'Invalid informational price.');
+      if (variant.stockProgramStatus != null && !['stock-program', 'while-stocks-last'].includes(variant.stockProgramStatus) || variant.availabilityBasis != null && variant.availabilityBasis !== 'pricelist') throw new ApiError(400, 'Invalid stock-program metadata.');
       return { id: variant.id, lengthMm: variant.lengthMm, widthMm: variant.widthMm, thicknessMm: variant.thicknessMm, unit: variant.unit, priceGross: variant.priceGross, vatRate: variant.vatRate,
-        profile: cleanString(variant.profile, 'profile', 150), color: cleanString(variant.color, 'color', 150), availability: cleanString(variant.availability, 'availability', 200) || null, stock };
+        profile: cleanString(variant.profile, 'profile', 150), color: cleanString(variant.color, 'color', 150), availability: cleanString(variant.availability, 'availability', 200) || null, stock,
+        articleNumber, sourceName: optionalText('sourceName'), sourceCategory: optionalText('sourceCategory', 150), rebateGroup, sourcePage: variant.sourcePage ?? null,
+        sourceFormat: optionalText('sourceFormat', 100), sourceThickness: optionalText('sourceThickness', 30), sourceSize: optionalText('sourceSize', 120), sourceUnit: variant.sourceUnit ?? null,
+        packageQuantity: variant.packageQuantity ?? null, pricePerBmGross: variant.pricePerBmGross ?? null, stockProgramStatus: variant.stockProgramStatus ?? null, availabilityBasis: variant.availabilityBasis ?? null };
     });
     return { id: product.id, name, category: product.category, family: cleanString(product.family, 'family', 150), manufacturer: cleanString(product.manufacturer, 'manufacturer', 150) || null,
       woodSpecies: cleanString(product.woodSpecies, 'species', 150) || null, surface: cleanString(product.surface, 'surface', 150) || null, description: cleanString(product.description, 'description', 10000),
-      images: product.images, variants, technicalSheet, sourceUrls, status: product.status };
+      images: [...product.images], imageKind: product.imageKind === 'product' ? 'product' : 'illustration', supplier: cleanString(product.supplier, 'supplier', 150) || null,
+      variants, technicalSheet, sourceUrls, stockSource, status: product.status };
   });
 }
 export function calculateOrder(value, catalog) {

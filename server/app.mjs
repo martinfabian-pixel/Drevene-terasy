@@ -2,12 +2,22 @@ import { createServer } from 'node:http';
 import { randomBytes, randomUUID, createHash, scryptSync, timingSafeEqual } from 'node:crypto';
 import { ApiError, calculateOrder, requestHash, validateInquiry, validateProductCatalog } from './domain.mjs';
 import { createStore } from './store.mjs';
+import { backendCatalogPolicy } from './stock-policy.mjs';
 export function createApi(config) {
   const store = createStore(config.dataPath, config.encryptionKey), sessions = new Map(), attempts = new Map();
   const allowedOrigins = new Set(config.allowedOrigins || []), now = config.now || (() => Date.now());
   if (!config.passwordHash || !/^[a-f0-9]{32,128}:[a-f0-9]{128}$/.test(config.passwordHash)) throw new Error('A salted scrypt admin password hash is required.');
   if (!config.adminUser || allowedOrigins.size === 0) throw new Error('Admin user and origin allowlist are required.');
   const [salt, digest] = config.passwordHash.split(':');
+  const catalogPolicy = backendCatalogPolicy(config);
+  const approvedProducts = items => catalogPolicy.enforce(validateProductCatalog(items));
+  const commerceEnabled = config.commerceApproved === true && config.commerceLive === true && catalogPolicy.allowLiveOrders === true;
+  const ready = store.mutate(data => {
+    if (!Array.isArray(data.products)) throw new ApiError(409, 'Stored catalog is invalid.');
+    data.products = approvedProducts(data.products.length ? data.products : catalogPolicy.approved);
+  });
+  // start.mjs awaits this; requests also fail closed until initialization succeeds.
+  void ready.catch(() => {});
   const headers = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer', 'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'" };
   const hash = value => createHash('sha256').update(value).digest('hex');
   function reply(response, status, value, extra = {}) { response.writeHead(status, { ...headers, ...extra }); response.end(JSON.stringify(value)); }
@@ -43,6 +53,7 @@ export function createApi(config) {
   }
   const server = createServer(async (request, response) => {
     try {
+      await ready;
       const origin = request.headers.origin;
       if (origin && !allowedOrigins.has(origin)) throw new ApiError(403, 'Origin not allowed.');
       if (origin) { response.setHeader('Access-Control-Allow-Origin', origin); response.setHeader('Access-Control-Allow-Credentials', 'true'); response.setHeader('Vary', 'Origin'); }
@@ -50,7 +61,7 @@ export function createApi(config) {
       const route = new URL(request.url, 'http://localhost').pathname;
       if (request.method !== 'GET' && !origin) throw new ApiError(403, 'Origin required.');
       limited(request, 'global', 120);
-      if (request.method === 'GET' && route === '/api/capabilities') return reply(response, 200, { inquiries: config.acceptInquiries === true, orders: config.commerceApproved === true && config.commerceLive === true, payments: false, adminRequiresAuthentication: true });
+      if (request.method === 'GET' && route === '/api/capabilities') return reply(response, 200, { inquiries: config.acceptInquiries === true, orders: commerceEnabled, payments: false, adminRequiresAuthentication: true });
       if (request.method === 'POST' && route === '/api/admin/login') {
         limited(request, 'login', 5); const input = await json(request);
         if (typeof input.password !== 'string' || input.password.length > 200) throw new ApiError(401, 'Invalid credentials.');
@@ -67,9 +78,9 @@ export function createApi(config) {
         admin(request, request.method !== 'GET');
         const collection = route.slice('/api/admin/'.length);
         if (!['products', 'articles', 'realizations', 'orders', 'inquiries'].includes(collection)) throw new ApiError(404, 'Not found.');
-        if (request.method === 'GET') return reply(response, 200, { items: (await store.read())[collection] });
+        if (request.method === 'GET') { const data = await store.read(); return reply(response, 200, { items: collection === 'products' ? approvedProducts(data.products) : data[collection] }); }
         if (request.method === 'PUT' && ['products', 'articles', 'realizations'].includes(collection)) {
-          const body = await json(request), items = collection === 'products' ? validateProductCatalog(body.items) : body.items;
+          const body = await json(request), items = collection === 'products' ? approvedProducts(body.items) : body.items;
           if (!Array.isArray(items) || items.length > 1000 || JSON.stringify(items).length > 2_000_000) throw new ApiError(400, 'Invalid content.');
           await store.mutate(data => { data[collection] = items; }); return reply(response, 200, { saved: true, count: items.length });
         }
@@ -81,13 +92,13 @@ export function createApi(config) {
         const result = await idempotent(request, body, data => { const id = randomUUID(); data.inquiries.push({ id, createdAt: new Date().toISOString(), status: 'new', ...inquiry }); return { id, status: 'received' }; }); return reply(response, 201, result);
       }
       if (request.method === 'POST' && route === '/api/orders') {
-        if (!(config.commerceApproved && config.commerceLive)) throw new ApiError(503, 'Real orders are disabled.');
+        if (!commerceEnabled) throw new ApiError(503, 'Real orders are disabled.');
         limited(request, 'order', 5); const body = await json(request);
-        const result = await idempotent(request, body, data => { const order = calculateOrder(body, data.products); for (const item of order.items) { const variant = data.products.find(product => product.id === item.productId).variants.find(variant => variant.id === item.variantId); variant.stock.availableQuantity -= item.quantity; } data.orders.push(order); return { id: order.id, status: order.status, paymentStatus: order.paymentStatus }; }); return reply(response, 201, result);
+        const result = await idempotent(request, body, data => { data.products = approvedProducts(data.products); const order = calculateOrder(body, data.products); for (const item of order.items) { const variant = data.products.find(product => product.id === item.productId).variants.find(variant => variant.id === item.variantId); variant.stock.availableQuantity -= item.quantity; } data.orders.push(order); return { id: order.id, status: order.status, paymentStatus: order.paymentStatus }; }); return reply(response, 201, result);
       }
       throw new ApiError(404, 'Not found.');
     } catch (error) { reply(response, error instanceof ApiError ? error.status : 500, { error: error instanceof ApiError ? error.message : 'Internal server error.' }); }
   });
   server.requestTimeout = 30000; server.headersTimeout = 10000; server.maxHeadersCount = 50;
-  return { server, store };
+  return { server, store, ready };
 }

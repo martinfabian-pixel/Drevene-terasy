@@ -2,7 +2,7 @@
 
 Existujúci projekt **martinfabian-pixel/Drevene-terasy**. Dizajnový smer Experimental Architectural Commerce 2027: biela, čierna, limetkovozelená, monumentálna typografia a technické 2D/3D zobrazenie.
 
-Používateľ schválil pokračovanie z titulky na katalóg, plánovač, košík a ďalšie stránky. Predchádzajúce koncepty sú zachované v archíve; ich historické schvaľovacie pravidlá neopisujú aktuálny stav.
+Používateľ schválil pokračovanie z titulky na katalóg, plánovač, košík a ďalšie stránky. Predchádzajúce koncepty sú zachované len v zdrojovom kóde. Ich verejné trasy teraz smerujú na schválenú titulku, aby neponúkali staré demo produkty.
 
 ## Aktuálny rozsah
 
@@ -14,7 +14,7 @@ Používateľ schválil pokračovanie z titulky na katalóg, plánovač, košík
 - Oddelený deterministický výpočtový modul, materiálový zoznam a optimalizácia nárezov. Uloženie/otvorenie projektu, export JSON, tlač/uloženie PDF a košík.
 - Lokálny košík a dopytová pokladňa s fakturačnými údajmi, firmou, dopravou/odberom a rekapituláciou.
 - Realizácia na kľúč, kontakt, galéria označených vizualizácií, O nás a deväť poradenských článkov s primárnymi zdrojmi.
-- Funkčné lokálne administračné demo: produkty, varianty, ceny, fotografie/náhľady, dostupnosť, CSV/JSON, explicitné lokálne zálohy a príprava obsahu.
+- Lokálne administračné návrhy: nemenný verejný skladový program, CSV/JSON aktualizácie cien na kontrolu, vlastné fotografie/náhľady, explicitné lokálne zálohy a príprava obsahu. Nové artikle vyžadujú samostatné schválenie.
 - Pripravený oddelený backend a API klient. Server, produkčná administrácia, prijímanie zákazníckych údajov, platby a reálne objednávky **nie sú aktivované**.
 
 ## Trasy
@@ -27,22 +27,24 @@ Základ: [Drevené terasy](https://martinfabian-pixel.github.io/Drevene-terasy/)
 | `#/terasove-dosky` | Katalóg dosiek |
 | `#/masivne-drevo`, `#/thermowood`, `#/wpc-terasy` | Kategórie |
 | `#/prislusenstvo` | Príslušenstvo |
-| `#/produkt/demo-massive` | Demo detail a varianty |
+| `#/produkt/jaf-cd906ffb` | Detail Borovice Cancun Max / 55990/2640 |
 | `#/planovac` | 2D/3D plánovač |
 | `#/kosik`, `#/pokladna` | Košík a lokálny dopyt |
 | `#/realizacie`, `#/realizacia-na-kluc` | Inšpirácia a služby |
 | `#/poradna`, `#/o-nas`, `#/kontakt` | Obsah |
 | `#/admin` | Jasne označené lokálne demo |
 | `#/pravne-informacie` | Podklady na odborné schválenie |
-| `#/archiv`, `#/atelier/domov`, `#/a/domov`, `#/b/domov`, `#/c/domov` | Staršie návrhy |
+| `#/archiv`, `#/atelier/domov`, `#/a/domov`, `#/b/domov`, `#/c/domov` | Presmerovanie na schválenú titulku |
 
 ## Údaje a hranice výpočtov
 
-- Päť zadaných kategórií JAF pri automatickom čítaní vracia HTTP 403. Bez CSV/cenníka a technických listov sa aktuálny sortiment, ceny a dostupnosť neuvádzajú ako overené.
-- Seedovaný katalóg obsahuje **DEMO** produkty. Rozmery a montážne hodnoty sú demonštračné. Ceny, výrobca, dostupnosť a dokumenty sú nevyplnené, kým sa nedodajú overené údaje.
+- **Jediný zdroj sortimentu a cien:** dodaný PDF skladový cenník JAF HOLZ z 10. 10. 2026, fyzické strany 3–8. Importovaných je **137 artiklov / 83 produktov**; všetky ostatné demo produkty sú mimo verejného katalógu, vyhľadávania, odporúčaní, košíka a plánovača.
+- Presné ceny s DPH za kus/balenie sú bez zliav a prirážok. Informačná cena za bm sa kopíruje samostatne. Zachované sú artikle, rozmery, zdrojové názvy, kategórie, rabatové skupiny a 13 označení do vypredania zásob. Označenie PDF nie je aktuálna skladová dostupnosť.
+- PDF neuvádza sadzbu DPH, montážne pravidlá, počet kusov väčšiny balení ani objem náterov. Tieto údaje sa nevymýšľajú. Plánovač zobrazuje presný pôdorys/2D/3D, ale bez montážnych pravidiel blokuje kusovník konštrukcie a nárezy.
+- [Kontrola každého artikla a opakovateľná aktualizácia PDF](docs/stock-program-2026-10-10.html).
 - Vložené architektonické a materiálové vizualizácie projektu sú označené AI ilustrácie, nie fotografie realizácií firmy. Obrázok vložený používateľom v lokálnom deme má samostatný neutrálny popis pôvodu.
 - Instagram/Facebook neboli dostupné na automatickú analýzu. Firemné kontakty, vlastné fotografie, realizácie ani hodnotenia sa nevymýšľajú.
-- Plánovač rozlišuje geometriu, demo výpočet a technicky overený montážny profil. Nepodporená geometria, podklad, neplatný pôdorys alebo nekompletné pravidlá vedú k vysvetleniu a zablokovaniu príslušného kusovníka. [Podrobné hranice](docs/calculations.html).
+- Plánovač rozlišuje geometriu a technicky overený montážny profil. Nepodporená geometria, podklad, neplatný pôdorys alebo nekompletné pravidlá vedú k vysvetleniu a zablokovaniu príslušného kusovníka. [Podrobné hranice](docs/calculations.html).
 - Tlač do PDF využíva prehliadač; tento náhľad neposkytuje serverový PDF archív.
 - Dopyty sú lokálne súbory na stiahnutie. Údaje ani fotografie sa neposielajú firme. Kontaktné údaje sa automaticky neukladajú v prehliadači.
 
@@ -71,6 +73,7 @@ Node.js 24:
 npm install
 npm run dev
 npm run build
+npm run test:stock
 npm run test:engine
 npm run test:commerce
 npm run test:server

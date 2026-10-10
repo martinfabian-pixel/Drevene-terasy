@@ -11,8 +11,10 @@ export function validateLocalCatalog(value: unknown): Product[] | null {
       const imported = importProductCsv(exportProductCsv([raw]));
       if (imported.errors.length || imported.products.length !== 1) return null;
       const product = imported.products[0];
-      if (raw.images.some((source: unknown) => typeof source !== 'string' || !(isLocalImage(source) || /^[a-zA-Z0-9_-]+\.(webp|png|jpg|jpeg)$/.test(source)))) return null;
+      if (raw.images.some((source: unknown) => typeof source !== 'string' || !(isLocalImage(source) || source === 'stock-accessory.svg' || /^[a-zA-Z0-9_-]+\.(webp|png|jpg|jpeg)$/.test(source)))) return null;
       product.images = raw.images.slice(0, 6);
+      product.imageKind = raw.imageKind === 'product' ? 'product' : 'illustration';
+      product.supplier = typeof raw.supplier === 'string' ? raw.supplier.slice(0, 200) : null;
       if (!product.images.length) return null;
       product.description = typeof raw.description === 'string' ? raw.description.slice(0, 10000) : product.description;
       product.relatedProductIds = Array.isArray(raw.relatedProductIds) ? raw.relatedProductIds.filter((id: unknown) => typeof id === 'string' && /^[a-z0-9_-]+$/.test(id)).slice(0, 100) : [];

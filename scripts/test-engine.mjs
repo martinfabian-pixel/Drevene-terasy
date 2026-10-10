@@ -20,7 +20,7 @@ try {
         }
         return {errors:[{text:`Missing engine source: ${target}`}]};
       });
-      build.onLoad({filter:/.*/,namespace:'engine-files'},async args=>({contents:await readFile(args.path,'utf8'),loader:'ts',resolveDir:dirname(args.path)}));
+      build.onLoad({filter:/.*/,namespace:'engine-files'},async args=>({contents:await readFile(args.path,'utf8'),loader:args.path.endsWith('.json')?'json':'ts',resolveDir:dirname(args.path)}));
     }}]});
   await writeFile(output,result.outputFiles[0].contents);
   const child=spawnSync(process.execPath,[output],{stdio:'inherit'});

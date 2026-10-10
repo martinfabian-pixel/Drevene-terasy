@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="sk"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Backend – politika skladového programu JAF</title>
+<style>body{max-width:850px;margin:48px auto;padding:0 24px;background:#f7f7f4;color:#101010;font:16px/1.65 system-ui,sans-serif}h1,h2{line-height:1.15}code{font-size:.9em;overflow-wrap:anywhere}a{color:inherit}table{border-collapse:collapse;width:100%}td,th{padding:10px;border:1px solid #aaa;text-align:left}</style>
+<h1>Backend: schválený skladový program</h1>
+<p>Stav k 10. 10. 2026. Backend je pripravený lokálne; nebol nasadený a nespracúva reálne zákaznícke objednávky ani platby.</p>
+<h2>Jediný schválený sortiment</h2>
+<p>Predvolený server načíta <code>src/data/jaf-stock-2026-10-10.json</code>: 83 produktových skupín a 137 variantov z fyzických strán 3–8 dodaného PDF. Zdrojový SHA-256 je <code>6aa8d8b5e69e2a48a337ed23aa36de477952c67060e267975d0d39ec97cf1aaf</code>.</p>
+<p><code>server/stock-policy.mjs</code> vynucuje kompletný schválený katalóg. Názvy, artikle, varianty, rozmery, predajné jednotky, rabatové skupiny, presné ceny s DPH, zdrojové stránky, označenia skladového programu a celý zdrojový odtlačok musia súhlasiť s manifestom. Zmena ceny, nový artikel, vynechaný produkt alebo odlišný zdroj sú odmietnuté pred zápisom.</p>
+<h2>Spustenie a administrácia</h2>
+<p>Prázdne šifrované úložisko dostane schválený katalóg. Ak existujúce úložisko obsahuje nepovolený alebo pozmenený sortiment, server sa nespustí. Pôvodné údaje sa automaticky nemažú ani neprepisujú. Kontrola platí aj pre čítanie a zápis produktov v autentifikovanom administračnom API a pred výpočtom objednávky.</p>
+<p>Prevádzkové údaje o potvrdenej skladovej zásobe a povolené obrazové či technické podklady môžu byť doplnené; zdrojové obchodné údaje zostávajú uzamknuté. Nový cenník potrebuje kontrolu, schválenie a aktualizáciu kanonického manifestu.</p>
+<h2>Cena s DPH nie je potvrdená sadzba DPH</h2>
+<p>PDF uvádza ceny s DPH, ale neuvádza percentuálnu sadzbu. Katalóg preto správne prijíma overenú cenu s DPH a <code>vatRate: null</code>. Neodvodzuje cenu bez DPH ani nevymýšľa daňovú sadzbu. Označenie „Skladový program“ alebo „Skladom do vypredania zásob“ nie je potvrdenou aktuálnou dostupnosťou.</p>
+<p>Výpočet reálnej objednávky vyžaduje overenú daňovú sadzbu aj aktuálnu zásobu. Predvolená skladová politika navyše blokuje reálne objednávky aj pri nastavení oboch príznakov <code>commerceApproved</code> a <code>commerceLive</code>. Aktivácia potrebuje samostatnú kontrolu daňových a skladových údajov, konfiguráciu backendu a výslovný súhlas vlastníka. Platby nie sú aktivované.</p>
+<h2>Izolované testovanie</h2>
+<p>Testovací katalóg je možné vložiť iba explicitnou konfiguráciou v kóde s <code>testOnly: true</code> a objektom vytvoreným funkciou <code>createTestOnlyCatalogPolicy</code>. Objekt má súkromnú značku Symbol; obyčajný JSON ju nenahradí. Produkčný vstup <code>server/start.mjs</code> túto možnosť neposkytuje a žiadna premenná prostredia neobchádza skladovú politiku.</p>
+<table><tr><th>Kontrola</th><th>Výsledok</th></tr><tr><td>Lokálne backendové testy vrátane autentifikácie, pôvodu požiadaviek, produktovej politiky a vypnutých objednávok</td><td>47 úspešných, 0 neúspešných</td></tr><tr><td>Porovnanie backendového katalógu s aktuálnym frontendovým generátorom</td><td>83 skupín, 137 variantov; všetky polia zhodné po odhliadnutí od explicitného <code>stock: null</code> v backendovej vrstve</td></tr><tr><td>Kontrolný súčet jednej predajnej jednotky každého artikla</td><td>495 999 centov; 13 označení do vypredania zásob</td></tr></table>
+<p><a href="stock-program-2026-10-10.html">Dokumentácia importu a nezávislého auditu PDF</a></p>
+</html>
