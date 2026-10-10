@@ -1,14 +1,18 @@
 {
-  "name": "drevene-terasy-design-stage-0",
+  "name": "drevene-terasy",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "check": "tsc -b",
-    "test:homepage": "node scripts/qa-homepage2027-ci.mjs"
+    "test:homepage": "node scripts/qa-homepage2027-ci.mjs",
+    "test:engine": "node scripts/test-engine.mjs",
+    "test:platform": "node scripts/qa-platform-ci.mjs",
+    "test:commerce": "node server/test-commerce.mjs",
+    "test:server": "node server/test.mjs"
   },
   "dependencies": {
     "react": "19.2.0",

@@ -1,19 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { asset } from './data';
+import { useCart } from './commerce/cart';
 import DeckScene2027 from './DeckScene2027';
 import './homepage2027.css';
 
 const links = [
-  { label: 'Terasové dosky', to: '/atelier/katalog' },
-  { label: 'Príslušenstvo', to: '/atelier/katalog?prislusenstvo=1' },
-  { label: 'Plánovač', to: '/atelier/planovac' },
-  { label: 'Realizácie', to: '/atelier/realizacia' },
-  { label: 'Poradňa', to: '/a/poradna' },
-  { label: 'O nás', to: '/atelier/identita' },
-  { label: 'Kontakt', to: '/atelier/realizacia' },
+  { label: 'Terasové dosky', to: '/terasove-dosky' },
+  { label: 'Príslušenstvo', to: '/prislusenstvo' },
+  { label: 'Plánovač', to: '/planovac' },
+  { label: 'Realizácie', to: '/realizacie' },
+  { label: 'Poradňa', to: '/poradna' },
+  { label: 'O nás', to: '/o-nas' },
+  { label: 'Kontakt', to: '/kontakt' },
 ];
-const layers = ['Dosky', 'Rošt', 'Nosné profily', 'Terče', 'Podklad'];
+const layers = ['Dosky', 'Jeden nosný rošt', 'Terče', 'Podklad'];
 const gallery = [
   { image: 'architecture-home-2027.webp', alt: 'AI ilustrácia terasy pri súčasnom dome s drevenou fasádou' },
   { image: 'terrace-garden-v2.webp', alt: 'AI ilustrácia drevenej terasy otvorenej do záhrady' },
@@ -40,13 +41,13 @@ function Brand() {
   return <Link to="/" className="arch2027-brand" aria-label="Drevené terasy, úvodná stránka"><span className="arch2027-brand-mark" aria-hidden="true"><i /><i /></span><span>DREVENÉ<br />TERASY</span></Link>;
 }
 
-function Header() {
+export function Header2027() {
+  const cart = useCart();
   const [open, setOpen] = useState(false);
-  const [cartNotice, setCartNotice] = useState(false);
   const menu = useRef<HTMLDivElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
   const location = useLocation();
-  useEffect(() => { setOpen(false); setCartNotice(false); }, [location.pathname, location.search]);
+  useEffect(() => { setOpen(false); }, [location.pathname, location.search]);
   useEffect(() => {
     if (!open) return;
     const previousOverflow = document.body.style.overflow;
@@ -70,17 +71,16 @@ function Header() {
     <div className="arch2027-header-brand"><Brand /><p>PRÍRODA<br />V TVOJOM<br />PRIESTORE</p></div>
     <nav className="arch2027-desktop-nav" aria-label="Hlavná navigácia">{links.map(link => <Link key={link.label} to={link.to}>{link.label}</Link>)}</nav>
     <div className="arch2027-header-tools">
-      <Link className="arch2027-search" to="/atelier/katalog" aria-label="Vyhľadať materiál"><Symbol kind="search" /></Link>
-      <button className="arch2027-cart" aria-label="Košík, 0 položiek; objednávanie pripravujeme" aria-expanded={cartNotice} onClick={() => setCartNotice(!cartNotice)}><Symbol kind="bag" /><span>(0)</span></button>
-      <Link to="/atelier/planovac" className="arch2027-header-cta">NAVRHNÚŤ<br />TERASU <Arrow /></Link>
+      <Link className="arch2027-search" to="/terasove-dosky" aria-label="Vyhľadať materiál"><Symbol kind="search" /></Link>
+      <Link className="arch2027-cart" to="/kosik" aria-label={`Košík, ${cart.items.length} položiek`}><Symbol kind="bag" /><span>({cart.items.length})</span></Link>
+      <Link to="/planovac" className="arch2027-header-cta">NAVRHNÚŤ<br />TERASU <Arrow /></Link>
       <button ref={toggle} data-testid="homepage-menu" className="arch2027-menu-toggle" aria-label="Otvoriť navigáciu" aria-expanded={open} aria-controls="arch2027-menu" onClick={() => setOpen(true)}><i /><i /><i /></button>
     </div>
-    {cartNotice && <div className="arch2027-cart-notice" role="status"><span>Košík je prázdny. Objednávanie pripravujeme.</span><button aria-label="Zavrieť informáciu o košíku" onClick={() => setCartNotice(false)}>×</button></div>}
     {open && <div id="arch2027-menu" ref={menu} data-testid="homepage-nav" className="arch2027-menu" role="dialog" aria-modal="true" aria-label="Navigácia">
       <div className="arch2027-menu-top"><Brand /><button aria-label="Zavrieť navigáciu" onClick={() => setOpen(false)}>×</button></div>
       <nav aria-label="Mobilná navigácia"><Link to="/" onClick={() => setOpen(false)}>Domov</Link>{links.map(link => <Link key={link.label} to={link.to} onClick={() => setOpen(false)}>{link.label}</Link>)}</nav>
-      <Link className="arch2027-menu-search" to="/atelier/katalog"><Symbol kind="search" />Hľadať materiál <Arrow /></Link>
-      <Link className="arch2027-menu-photo" to="/atelier/katalog"><img src={asset('terrace-detail-v2.webp')} alt="Ilustračný detail terasového dreva" /><span>MATERIÁLY,<br />KTORÉ MAJÚ CHARAKTER</span><Arrow /></Link>
+      <Link className="arch2027-menu-search" to="/terasove-dosky"><Symbol kind="search" />Hľadať materiál <Arrow /></Link>
+      <Link className="arch2027-menu-photo" to="/terasove-dosky"><img src={asset('terrace-detail-v2.webp')} alt="Ilustračný detail terasového dreva" /><span>MATERIÁLY,<br />KTORÉ MAJÚ CHARAKTER</span><Arrow /></Link>
     </div>}
   </header>;
 }
@@ -105,11 +105,11 @@ function Hero() {
       <h1 id="arch2027-hero-title" className="arch2027-title"><span className="arch2027-title-black">PRIESTOR.</span><span className="arch2027-title-green">TVOJ.</span></h1>
       <p className="arch2027-hero-detail">PREMYSLENÉ<br />DO POSLEDNÉHO<br />DETAILU</p>
       <div className={`arch2027-construction${modelActive ? ' is-active' : ''}`}><div className="arch2027-hero-model"><DeckScene2027 active={modelActive} assembled={assembled} layer={layer} className="arch2027-hero-render" /></div><Dimensions /></div>
-      <div className="arch2027-layer-legend" aria-label="Vrstvy terasy">{layers.map((name, index) => <button key={name} data-testid={`deck-layer-${index + 1}`} aria-pressed={layer === index + 1} onClick={() => selectLayer(layer === index + 1 ? 0 : index + 1)}><span>0{index + 1}</span>{name}</button>)}<span className="arch2027-layer-space">06 <span>VÁŠ PRIESTOR</span></span></div>
+      <div className="arch2027-layer-legend" aria-label="Vrstvy terasy">{layers.map((name, index) => <button key={name} data-testid={`deck-layer-${index + 1}`} aria-pressed={layer === index + 1} onClick={() => selectLayer(layer === index + 1 ? 0 : index + 1)}><span>0{index + 1}</span>{name}</button>)}<span className="arch2027-layer-space">05 <span>VÁŠ PRIESTOR</span></span></div>
       <p className="arch2027-hero-mantra">DIZAJN.<br />MATERIÁL.<br />REALIZÁCIA.</p>
-      <div className="arch2027-hero-start"><Link to="/atelier/planovac" className="arch2027-black-button">ZAČAŤ NAVRHOVAŤ <Arrow /></Link><Link to="/atelier/planovac" className="arch2027-circle-button" aria-label="Otvoriť plánovač terasy"><Arrow /></Link></div>
+      <div className="arch2027-hero-start"><Link to="/planovac" className="arch2027-black-button">ZAČAŤ NAVRHOVAŤ <Arrow /></Link><Link to="/planovac" className="arch2027-circle-button" aria-label="Otvoriť plánovač terasy"><Arrow /></Link></div>
       <div className="arch2027-material-study"><img className="arch2027-study-photo" src={asset('architecture-terrace.webp')} alt="Ilustračný architektonický detail" /><img className="arch2027-study-grain" src={asset('material-drevo-2027.webp')} alt="Ilustračná kresba terasového dreva" /><span className="arch2027-study-number">03</span><p>FUNKČNÝ DIZAJN<br />SKUTOČNÉ MATERIÁLY<br />TRVALÁ HODNOTA</p></div>
-      <button data-testid="deck-layer-next" className="arch2027-layer-plus" aria-label={layer === 0 ? 'Zvýrazniť dosky terasy' : 'Zvýrazniť ďalšiu vrstvu terasy'} onClick={() => selectLayer((layer + 1) % 6)}><Symbol kind="plus" /></button>
+      <button data-testid="deck-layer-next" className="arch2027-layer-plus" aria-label={layer === 0 ? 'Zvýrazniť dosky terasy' : 'Zvýrazniť ďalšiu vrstvu terasy'} onClick={() => selectLayer((layer + 1) % 5)}><Symbol kind="plus" /></button>
       <button data-testid="deck-discovery" className="arch2027-discover" onClick={() => { setModelActive(true); setAssembled(!assembled); }} aria-pressed={assembled}><span><Symbol kind="plus" /></span>{assembled ? <>ROZLOŽIŤ<br />KONŠTRUKCIU</> : <>OBJAVIŤ<br />KONŠTRUKCIU</>}</button>
       <p className="arch2027-hero-model-note" aria-live="polite">{layer ? `Zvýraznená vrstva: ${layers[layer - 1]}. ` : ''}Ilustračná konštrukcia a rozmery.</p>
       <div className="arch2027-slide-indicator" aria-hidden="true"><span className="is-current">01</span><span>02</span><span>03</span></div>
@@ -141,25 +141,25 @@ function PlannerPreview() {
   const [shape, setShape] = useState<Shape>('rectangle');
   return <section className="arch2027-planner" aria-labelledby="arch2027-planner-title" id="arch2027-planner">
     <div className="arch2027-planner-message"><p className="arch2027-section-number">02</p><h2 id="arch2027-planner-title">NAVRHNI.<br />VIZUALIZUJ.<br />OBJEDNAJ.<br />ZREALIZUJ.</h2></div>
-    <div className="arch2027-planner-controls"><h3>PLÁNOVAČ TERÁS</h3><div className="arch2027-planner-steps"><span>TVAR</span><span>ROZMERY</span><span>MATERIÁL</span><span>3D NÁHĽAD</span><span>VÝSLEDOK</span></div><div className="arch2027-shapes" aria-label="Ukážka výberu tvaru">{shapeChoices.map(item => <button key={item.id} data-testid={`deck-shape-${item.id}`} aria-pressed={shape === item.id} onClick={() => { setShape(item.id); if (item.id !== 'rectangle') setMode('2d'); }}><ShapeIcon shape={item.id} /><span>{item.name}</span></button>)}</div><Link to="/atelier/planovac" className="arch2027-lime-button">ĎALEJ <Arrow /></Link><p className="arch2027-preview-note">Vizuálna ukážka rozhrania. Výpočty a objednávanie pripravujeme.</p></div>
+    <div className="arch2027-planner-controls"><h3>PLÁNOVAČ TERÁS</h3><div className="arch2027-planner-steps"><span>TVAR</span><span>ROZMERY</span><span>MATERIÁL</span><span>3D NÁHĽAD</span><span>VÝSLEDOK</span></div><div className="arch2027-shapes" aria-label="Ukážka výberu tvaru">{shapeChoices.map(item => <button key={item.id} data-testid={`deck-shape-${item.id}`} aria-pressed={shape === item.id} onClick={() => { setShape(item.id); if (item.id !== 'rectangle') setMode('2d'); }}><ShapeIcon shape={item.id} /><span>{item.name}</span></button>)}</div><Link to="/planovac" className="arch2027-lime-button">ĎALEJ <Arrow /></Link><p className="arch2027-preview-note">Otvor plánovač pre presné rozmery, 2D / 3D a materiálový zoznam.</p></div>
     <div className="arch2027-planner-view"><div className="arch2027-view-switch" role="group" aria-label="Zobrazenie návrhu"><button data-testid="deck-view2d" aria-pressed={mode === '2d'} onClick={() => setMode('2d')}>2D</button><button data-testid="deck-view3d" aria-pressed={mode === '3d'} disabled={shape !== 'rectangle'} onClick={() => setMode('3d')}>3D</button></div>{mode === '3d' ? <div className="arch2027-planner-model"><DeckScene2027 active={false} assembled className="arch2027-planner-render" /></div> : <PlanPreview shape={shape} />}<span className="arch2027-preview-visual-note">{shape === 'rectangle' ? 'ILUSTRAČNÝ NÁHĽAD' : '3D TOHTO TVARU PRIPRAVUJEME'}</span></div>
   </section>;
 }
 
 function Materials() {
   const materials = [
-    { name: 'MASÍVNE DREVO', subtitle: 'AUTENTICKÁ KRÁSA', image: 'material-drevo-2027.webp', kind: 'solid', to: '/atelier/produkt?id=drevo' },
-    { name: 'THERMOWOOD', subtitle: 'TEPELNE UPRAVENÉ DREVO', image: 'material-thermo-2027.webp', kind: 'thermo', to: '/atelier/produkt?id=thermo' },
-    { name: 'WPC TERASY', subtitle: 'KOMPOZITNÝ MATERIÁL', image: 'material-wpc-2027.webp', kind: 'wpc', to: '/atelier/produkt?id=wpc' },
-    { name: 'PRÍSLUŠENSTVO', subtitle: 'VŠETKO PRE MONTÁŽ', image: 'deck-exploded-2027.webp', kind: 'accessories', to: '/atelier/katalog?prislusenstvo=1' },
+    { name: 'MASÍVNE DREVO', subtitle: 'AUTENTICKÁ KRÁSA', image: 'material-drevo-2027.webp', kind: 'solid', to: '/produkt/demo-massive' },
+    { name: 'THERMOWOOD', subtitle: 'TEPELNE UPRAVENÉ DREVO', image: 'material-thermo-2027.webp', kind: 'thermo', to: '/produkt/demo-thermo' },
+    { name: 'WPC TERASY', subtitle: 'KOMPOZITNÝ MATERIÁL', image: 'material-wpc-2027.webp', kind: 'wpc', to: '/produkt/demo-wpc' },
+    { name: 'PRÍSLUŠENSTVO', subtitle: 'VŠETKO PRE MONTÁŽ', image: 'deck-exploded-2027-v2.webp', kind: 'accessories', to: '/prislusenstvo' },
   ];
-  return <section className="arch2027-materials" aria-labelledby="arch2027-materials-title" id="arch2027-materials"><div className="arch2027-materials-copy"><p className="arch2027-section-number">03</p><h2 id="arch2027-materials-title">MATERIÁLY,<br />KTORÉ MAJÚ<br />CHARAKTER</h2><p>Starostlivo vyberané dreviny a moderné WPC materiály pre váš priestor.</p><Link to="/atelier/katalog">OBJAVIŤ VŠETKY MATERIÁLY <Arrow /></Link></div><div className="arch2027-material-tiles">{materials.map(material => <Link key={material.name} to={material.to} className={`arch2027-material-tile arch2027-material-${material.kind}`}><img src={asset(material.image)} alt={`Ilustračný vizuál kategórie ${material.name.toLowerCase()}`} loading="lazy" decoding="async" /><span className="arch2027-material-tile-caption"><strong>{material.name}</strong><small>{material.subtitle}</small></span><span className="arch2027-tile-note">ILUSTRÁCIA · AI</span></Link>)}</div></section>;
+  return <section className="arch2027-materials" aria-labelledby="arch2027-materials-title" id="arch2027-materials"><div className="arch2027-materials-copy"><p className="arch2027-section-number">03</p><h2 id="arch2027-materials-title">MATERIÁLY,<br />KTORÉ MAJÚ<br />CHARAKTER</h2><p>Starostlivo vyberané dreviny a moderné WPC materiály pre váš priestor.</p><Link to="/terasove-dosky">OBJAVIŤ VŠETKY MATERIÁLY <Arrow /></Link></div><div className="arch2027-material-tiles">{materials.map(material => <Link key={material.name} to={material.to} className={`arch2027-material-tile arch2027-material-${material.kind}`}><img src={asset(material.image)} alt={`Ilustračný vizuál kategórie ${material.name.toLowerCase()}`} loading="lazy" decoding="async" /><span className="arch2027-material-tile-caption"><strong>{material.name}</strong><small>{material.subtitle}</small></span><span className="arch2027-tile-note">ILUSTRÁCIA · AI</span></Link>)}</div></section>;
 }
 
 function Realizations() {
   const [slide, setSlide] = useState(0);
   const change = (offset: number) => setSlide((slide + offset + gallery.length) % gallery.length);
-  return <section className="arch2027-realizations" aria-labelledby="arch2027-realizations-title" id="arch2027-realizations"><img data-testid="homepage-gallery-image" className="arch2027-realizations-image" src={asset(gallery[slide].image)} alt={gallery[slide].alt} loading="lazy" decoding="async" /><div className="arch2027-realizations-shade" /><div className="arch2027-realizations-copy"><p className="arch2027-section-number">04</p><h2 id="arch2027-realizations-title">REALIZÁCIE<br />NA MIERU</h2><p>INŠPIRÁCIA<br />PRE VÁŠ PROJEKT</p><span className="arch2027-short-rule" /><Link to="/atelier/realizacia" className="arch2027-outline-button">ZOBRAZIŤ REALIZÁCIE <Arrow /></Link></div><div className="arch2027-gallery-controls"><button data-testid="homepage-gallery-previous" className="arch2027-gallery-previous" onClick={() => change(-1)} aria-label="Predchádzajúca ilustračná fotografia"><Arrow /></button><div className="arch2027-gallery-thumbs">{gallery.map((image, index) => <button key={image.image} data-testid={`homepage-gallery-thumb-${index}`} aria-label={`Zobraziť ilustračnú fotografiu ${index + 1}`} aria-pressed={slide === index} onClick={() => setSlide(index)}><img src={asset(image.image)} alt="" loading="lazy" /></button>)}</div><button data-testid="homepage-gallery-next" className="arch2027-gallery-next" onClick={() => change(1)} aria-label="Nasledujúca ilustračná fotografia"><Arrow /></button></div><div className="arch2027-realizations-quote"><blockquote>„DREVO MENÍ<br />OBYČAJNÉ MIESTO<br />NA VÝNIMOČNÝ<br />PRIESTOR.“</blockquote><Link to="/atelier/realizacia"><span />NÁŠ PRÍSTUP</Link></div><p className="arch2027-realizations-note" aria-live="polite">0{slide + 1} / 03 · AI ilustrácie. Skutočné realizácie doplníme z vlastných fotografií.</p></section>;
+  return <section className="arch2027-realizations" aria-labelledby="arch2027-realizations-title" id="arch2027-realizations"><img data-testid="homepage-gallery-image" className="arch2027-realizations-image" src={asset(gallery[slide].image)} alt={gallery[slide].alt} loading="lazy" decoding="async" /><div className="arch2027-realizations-shade" /><div className="arch2027-realizations-copy"><p className="arch2027-section-number">04</p><h2 id="arch2027-realizations-title">REALIZÁCIE<br />NA MIERU</h2><p>INŠPIRÁCIA<br />PRE VÁŠ PROJEKT</p><span className="arch2027-short-rule" /><Link to="/realizacie" className="arch2027-outline-button">ZOBRAZIŤ REALIZÁCIE <Arrow /></Link></div><div className="arch2027-gallery-controls"><button data-testid="homepage-gallery-previous" className="arch2027-gallery-previous" onClick={() => change(-1)} aria-label="Predchádzajúca ilustračná fotografia"><Arrow /></button><div className="arch2027-gallery-thumbs">{gallery.map((image, index) => <button key={image.image} data-testid={`homepage-gallery-thumb-${index}`} aria-label={`Zobraziť ilustračnú fotografiu ${index + 1}`} aria-pressed={slide === index} onClick={() => setSlide(index)}><img src={asset(image.image)} alt="" loading="lazy" /></button>)}</div><button data-testid="homepage-gallery-next" className="arch2027-gallery-next" onClick={() => change(1)} aria-label="Nasledujúca ilustračná fotografia"><Arrow /></button></div><div className="arch2027-realizations-quote"><blockquote>„DREVO MENÍ<br />OBYČAJNÉ MIESTO<br />NA VÝNIMOČNÝ<br />PRIESTOR.“</blockquote><Link to="/realizacie"><span />NÁŠ PRÍSTUP</Link></div><p className="arch2027-realizations-note" aria-live="polite">0{slide + 1} / 03 · AI ilustrácie. Skutočné realizácie doplníme z vlastných fotografií.</p></section>;
 }
 
 function Benefits() {
@@ -169,10 +169,10 @@ function Benefits() {
     { name: 'NÁVRH\nNA MIERU', kind: 'layers' },
     { name: 'KOMPLETNÁ\nREALIZÁCIA', kind: 'build' },
   ];
-  return <section className="arch2027-benefits" aria-label="Návrh, materiál a realizácia"><div className="arch2027-benefits-lime"><p>PREMYSLENÉ<br />RIEŠENIE<br />PRE VÁŠ<br />PRIESTOR</p><Symbol kind="leaf" /></div><div className="arch2027-benefit-items">{benefits.map(item => <Link key={item.name} to={item.kind === 'leaf' ? '/atelier/katalog' : '/atelier/realizacia'}><Symbol kind={item.kind} /><span>{item.name.split('\n').map(line => <span key={line}>{line}</span>)}</span></Link>)}</div><Link className="arch2027-benefits-black" to="/atelier/realizacia"><p>VIAC NEŽ TERASA.<br />PRIESTOR<br />PRE VÁŠ ŽIVOT.</p><span className="arch2027-circle-button"><Arrow /></span></Link></section>;
+  return <section className="arch2027-benefits" aria-label="Návrh, materiál a realizácia"><div className="arch2027-benefits-lime"><p>PREMYSLENÉ<br />RIEŠENIE<br />PRE VÁŠ<br />PRIESTOR</p><Symbol kind="leaf" /></div><div className="arch2027-benefit-items">{benefits.map(item => <Link key={item.name} to={item.kind === 'leaf' ? '/terasove-dosky' : '/realizacia-na-kluc'}><Symbol kind={item.kind} /><span>{item.name.split('\n').map(line => <span key={line}>{line}</span>)}</span></Link>)}</div><Link className="arch2027-benefits-black" to="/realizacie"><p>VIAC NEŽ TERASA.<br />PRIESTOR<br />PRE VÁŠ ŽIVOT.</p><span className="arch2027-circle-button"><Arrow /></span></Link></section>;
 }
 
 export default function Homepage2027() {
   useEffect(() => { document.title = 'Drevené terasy — Priestor. Tvoj.'; }, []);
-  return <div className="arch2027"><a className="arch2027-skip" href="#arch2027-main" onClick={event => { event.preventDefault(); document.getElementById('arch2027-main')?.focus(); }}>Preskočiť na obsah</a><Header /><main id="arch2027-main" tabIndex={-1}><Hero /><PlannerPreview /><Materials /><Realizations /><Benefits /></main></div>;
+  return <div className="arch2027"><a className="arch2027-skip" href="#arch2027-main" onClick={event => { event.preventDefault(); document.getElementById('arch2027-main')?.focus(); }}>Preskočiť na obsah</a><main id="arch2027-main" tabIndex={-1}><Hero /><PlannerPreview /><Materials /><Realizations /><Benefits /></main></div>;
 }

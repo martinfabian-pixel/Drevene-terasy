@@ -126,9 +126,9 @@ async function interactions(page, width) {
     assert.equal(await menu.evaluate(element => element === document.activeElement), true, 'Escape did not return focus to menu toggle');
     assert.equal(await page.evaluate(() => document.body.style.overflow), previousOverflow, 'Background scroll did not restore');
   });
-  await test('five model layers, next-layer cycle and discovery assembly toggle', async () => {
+  await test('four model layers, next-layer cycle and discovery assembly toggle', async () => {
     const states = [];
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= 4; i++) {
       const control = page.getByTestId(`deck-layer-${i}`);
       await control.click();
       const state = await selectedState(control);
@@ -138,7 +138,7 @@ async function interactions(page, width) {
       states.push({ label: await control.getAttribute('aria-label') || await control.textContent(), ...state });
     }
     const nextLayer = page.getByTestId('deck-layer-next');
-    await nextLayer.click(); // layer 5 -> whole construction (0)
+    await nextLayer.click(); // layer 4 -> whole construction (0)
     assert.equal(await page.locator('button[data-testid^="deck-layer-"][aria-pressed="true"]').count(), 0, 'Next-layer cycle should include whole construction');
     await nextLayer.click(); // whole construction -> boards (1)
     assert.equal(await page.getByTestId('deck-layer-1').getAttribute('aria-pressed'), 'true', 'Plus did not cycle to boards');

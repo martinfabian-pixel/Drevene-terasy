@@ -1,0 +1,37 @@
+import { findProduct, piecesForArea, productCatalog, saleQuantity, type Product } from './catalog';
+import { getCartTotals, validProductQuantity, validateCart } from './cart-core';
+import { csvTemplate, exportProductCsv, importProductCsv, parseCsv } from './csv';
+import { validateRulesJson } from './rules-import';
+export function runCommerceTests() {
+  let passed = 0;
+  const check = (condition: boolean, description: string) => { if (!condition) throw new Error(description); passed++; };
+  const board = productCatalog[0], variant = board.variants[0];
+  check(piecesForArea(10, variant) === Math.ceil(10_000_000 / (variant.widthMm! * variant.lengthMm!)), 'Area conversion uses exact selected dimensions.');
+  check(piecesForArea(0, variant) === null, 'Zero area is rejected.');
+  check(saleQuantity(2, { ...variant, unit: 'bm' }) === 4.8, 'Piece quantity converts to linear metres.');
+  check(saleQuantity(2, { ...variant, unit: 'm²' }) === .672, 'Piece quantity converts to square metres.');
+  check(validateCart(null).length === 0 && validateCart({ version: 2, items: [] }).length === 0, 'Unknown persisted cart versions are rejected.');
+  const item = { productId: board.id, variantId: variant.id, quantity: 2 };
+  const valid = validateCart({ version: 1, items: [item, item, { ...item, quantity: -1 }, { ...item, quantity: .5 }, { ...item, productId: 'unknown' }] });
+  check(valid.length === 1 && valid[0].quantity === 4, 'Persisted cart validates IDs and integer amounts and merges duplicates.');
+  check(!getCartTotals(valid).canOrder && getCartTotals(valid).unpricedCount === 1, 'Unknown prices cannot become orders.');
+  const priced: Product = { ...board, status: 'verified', variants: [{ ...variant, priceGross: 12.30, vatRate: 23 }] };
+  const totals = getCartTotals(valid, [priced]);
+  check(totals.knownGross === 49.20 && totals.knownNet === 40 && totals.knownVat === 9.2 && totals.canOrder, 'Line rounded gross/net/VAT are deterministic.');
+  check(!getCartTotals(valid, [{ ...priced, status: 'demo' }]).canOrder, 'A priced demo is never orderable.');
+  check(!validProductQuantity(.5, variant) && !validProductQuantity(.5, { ...variant, unit: 'bm' }) && validProductQuantity(.5, { ...variant, unit: 'l', lengthMm: null }), 'Physical pieces stay integer while litres can be fractional.');
+  check(getCartTotals(valid, [{ ...priced, variants: [{ ...priced.variants[0], vatRate: null }] }]).knownNet === null, 'Unknown VAT is never invented.');
+  check(findProduct('not-an-id') === undefined, 'Unknown product lookup is safe.');
+  const imported = importProductCsv(csvTemplate);
+  check(imported.errors.length === 0 && imported.products.length === 1 && imported.products[0].status === 'demo', 'Template imports as explicit demo.');
+  check(importProductCsv(exportProductCsv(productCatalog)).products.length === productCatalog.length, 'CSV product/variant export round trips.');
+  check(parseCsv('a;b\n"with;delimiter";"with""quote"\n')[1][1] === 'with"quote', 'CSV quoted delimiters and escaped quotes parse.');
+  check(parseCsv('a;b\n"two\nlines";x\n')[1][0] === 'two\nlines', 'Multiline quoted CSV fields parse.');
+  check(importProductCsv(csvTemplate.replace('massive', 'toString')).errors.length > 0, 'Prototype category names are rejected.');
+  check(importProductCsv(csvTemplate.replace('4000;140;26', '-2;140;26')).errors.length > 0, 'Invalid numeric dimensions are rejected.');
+  check(importProductCsv(csvTemplate.replace(';"ks";;;;;', ';"ks";10;;;;')).errors.length > 0, 'Imported prices require an explicit VAT rate.');
+  check(importProductCsv(csvTemplate.replace('"demo-import-4000"', '"bad id"')).errors.length > 0, 'Malformed variant IDs are rejected.');
+  check(exportProductCsv([{ ...board, name: '=HYPERLINK("evil")' }]).includes('"\'=HYPERLINK'), 'CSV exports escape spreadsheet formula prefixes.');
+  check(validateRulesJson({ verification: 'verified', source: 'https://example.com' }).rules === null, 'Partial verified rules cannot enter the engine.');
+  return { passed, failed: 0 };
+}

@@ -6,6 +6,10 @@ import { Catalog, ProductDetail } from './CatalogProduct';
 import Planner from './Planner';
 import Atelier from './Atelier';
 import Homepage2027 from './Homepage2027';
+import PlatformShell, { LegalPreview } from './PlatformShell';
+import Planner2027 from './Planner2027';
+import { CartProvider } from './commerce/cart';
+import { CatalogPage, ProductPage, CartPage, CheckoutPage, ServicePage, RealizationsPage, AdvicePage, AboutPage, ContactPage, AdminPage } from './PlatformPages';
 import './home.css';
 import './catalog.css';
 import './planner.css';
@@ -72,7 +76,7 @@ function ConceptSite() {
  if(!concept)return <Navigate to="/" replace/>;
  return <div className={`concept concept-${concept}`}>{!embedded&&<ReviewToolbar concept={concept} view={view}/>}<SiteHeader concept={concept}/>{view==='domov'?<Home concept={concept}/>:view==='katalog'?<Catalog concept={concept}/>:view==='produkt'?<ProductDetail concept={concept}/>:view==='planovac'?<Planner concept={concept}/>:view==='identita'?<Identity concept={concept}/>:view==='realizacia'?<Service concept={concept}/>:view==='poradna'?<Advice concept={concept}/>:<Navigate to={`/${concept}/domov`} replace/>}<Footer concept={concept}/></div>;
 }
-export default function App(){return <Routes><Route path="/" element={<Homepage2027/>}/><Route path="/2027" element={<Homepage2027/>}/><Route path="/atelier/:view?" element={<Atelier/>}/><Route path="/archiv" element={<Comparison/>}/><Route path="/:concept/:view?" element={<ConceptSite/>}/><Route path="*" element={<Navigate to="/" replace/>}/></Routes>}
+export default function App(){return <CartProvider><Routes><Route element={<PlatformShell/>}><Route path="/" element={<Homepage2027/>}/><Route path="/2027" element={<Homepage2027/>}/><Route path="/terasove-dosky" element={<CatalogPage/>}/><Route path="/masivne-drevo" element={<Navigate to="/terasove-dosky?category=massive" replace/>}/><Route path="/thermowood" element={<Navigate to="/terasove-dosky?category=thermo" replace/>}/><Route path="/wpc-terasy" element={<Navigate to="/terasove-dosky?category=wpc" replace/>}/><Route path="/prislusenstvo" element={<CatalogPage accessories/>}/><Route path="/produkt/:productId" element={<ProductPage/>}/><Route path="/planovac" element={<Planner2027/>}/><Route path="/realizacie" element={<RealizationsPage/>}/><Route path="/realizacia-na-kluc" element={<ServicePage/>}/><Route path="/poradna/:articleId?" element={<AdvicePage/>}/><Route path="/o-nas" element={<AboutPage/>}/><Route path="/kontakt" element={<ContactPage/>}/><Route path="/kosik" element={<CartPage/>}/><Route path="/pokladna" element={<CheckoutPage/>}/><Route path="/admin" element={<AdminPage/>}/><Route path="/pravne-informacie" element={<LegalPreview/>}/></Route><Route path="/atelier/:view?" element={<Atelier/>}/><Route path="/archiv" element={<Comparison/>}/><Route path="/:concept/:view?" element={<ConceptSite/>}/><Route path="*" element={<Navigate to="/" replace/>}/></Routes></CartProvider>}
 
 // Named exports also support the offline, static design review export.
 export { Comparison, ConceptSite };

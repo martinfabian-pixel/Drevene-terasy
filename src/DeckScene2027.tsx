@@ -3,13 +3,13 @@ import type * as Three from 'three';
 import { asset } from './data';
 
 type ThreeModule = typeof import('three');
-type SceneLayer = 1 | 2 | 3 | 4 | 5;
+type SceneLayer = 1 | 2 | 3 | 4;
 
 export interface DeckScene2027Props {
   /** Enable the real model after user interaction; keep the exact image beforehand. */
   active?: boolean;
   assembled?: boolean;
-  /** 0 = whole construction; 1 boards, 2 joists, 3 profiles, 4 pedestals, 5 base. */
+  /** 0 = whole construction; 1 boards, 2 joists, 3 pedestals, 4 base. */
   layer?: number;
   className?: string;
 }
@@ -133,7 +133,7 @@ function buildScene(three: ThreeModule, host: HTMLDivElement, onReady: () => voi
   scene.add(fill);
 
   const groups = new Map<SceneLayer, Three.Group>();
-  for (const index of [1, 2, 3, 4, 5] as SceneLayer[]) {
+  for (const index of [1, 2, 3, 4] as SceneLayer[]) {
     const group = new three.Group();
     group.name = `construction-layer-${index}`;
     group.userData.layer = index;
@@ -174,9 +174,6 @@ function buildScene(three: ThreeModule, host: HTMLDivElement, onReady: () => voi
     return mesh;
   }
 
-  const silver = material({ color: '#a9afb0', roughness: 0.34, metalness: 0.72 });
-  const silverEdge = material({ color: '#d1d4d0', roughness: 0.4, metalness: 0.55 });
-  const blackMetal = material({ color: '#24292b', roughness: 0.39, metalness: 0.65 });
   const plastic = material({ color: '#202426', roughness: 0.78, metalness: 0.02 });
   const groove = material({ color: '#101516', roughness: 0.67, metalness: 0.18 });
   const bolt = material({ color: '#535b5e', roughness: 0.29, metalness: 0.8 });
@@ -185,44 +182,30 @@ function buildScene(three: ThreeModule, host: HTMLDivElement, onReady: () => voi
   const concrete = material({ color: '#c3c3be', map: concreteMap, bumpMap: concreteMap, bumpScale: 0.018, roughness: 0.99 });
   const concreteSide = material({ color: '#9b9d9a', map: concreteMap, bumpMap: concreteMap, bumpScale: 0.024, roughness: 0.99 });
 
-  const base = groups.get(5)!;
-  box(base, [4.22, 0.24, 2.72], [0, 0.02, 0], [concreteSide, concreteSide, concrete, concreteSide, concreteSide, concreteSide]);
+  const base = groups.get(4)!;
+  box(base, [4.22, 0.16, 2.72], [0, -0.08, 0], [concreteSide, concreteSide, concrete, concreteSide, concreteSide, concreteSide]);
   const shadow = new three.Mesh(new three.PlaneGeometry(6.5, 5.2), new three.ShadowMaterial({ color: 0x232522, opacity: 0.13 }));
   shadow.rotation.x = -Math.PI / 2;
-  shadow.position.y = -0.105;
+  shadow.position.y = -0.161;
   shadow.receiveShadow = true;
   scene.add(shadow);
   ownedMaterials.add(shadow.material);
 
-  // The pedestal caps, screw stems and wide feet are separate visible parts.
-  const pedestals = groups.get(4)!;
-  const xSupports = [-1.75, -0.875, 0, 0.875, 1.75];
-  const zSupports = [-1.025, 0, 1.025];
+  // Illustration only: eleven parallel joists, each resting directly on four
+  // pedestals. There is no additional crossed structural grid or support rail.
+  const pedestals = groups.get(3)!;
+  const xSupports = Array.from({ length: 11 }, (_, index) => -1.96 + index * 0.392);
+  const zSupports = [-1.15, -0.385, 0.385, 1.15];
   for (const x of xSupports) {
     for (const z of zSupports) {
-      cylinder(pedestals, 0.125, 0.135, 0.043, [x, 0.164, z], plastic);
-      cylinder(pedestals, 0.071, 0.099, 0.175, [x, 0.272, z], plastic);
-      cylinder(pedestals, 0.05, 0.05, 0.095, [x, 0.384, z], groove);
-      for (let ring = 0; ring < 5; ring++) cylinder(pedestals, 0.057, 0.057, 0.009, [x, 0.35 + ring * 0.017, z], plastic, 16);
-      cylinder(pedestals, 0.117, 0.117, 0.029, [x, 0.444, z], plastic);
-      box(pedestals, [0.022, 0.03, 0.14], [x, 0.469, z], groove);
+      cylinder(pedestals, 0.102, 0.112, 0.015, [x, 0.0075, z], plastic);
+      cylinder(pedestals, 0.049, 0.079, 0.078, [x, 0.054, z], plastic);
+      cylinder(pedestals, 0.035, 0.035, 0.037, [x, 0.0965, z], groove);
+      for (let ring = 0; ring < 4; ring++) {
+        cylinder(pedestals, 0.04, 0.04, 0.004, [x, 0.083 + ring * 0.009, z], plastic, 16);
+      }
+      cylinder(pedestals, 0.094, 0.094, 0.01, [x, 0.115, z], plastic);
     }
-  }
-
-  const profiles = groups.get(3)!;
-  // Black longitudinal channels, including their open central groove.
-  for (const z of zSupports) {
-    box(profiles, [4.12, 0.028, 0.15], [0, 0.51, z], blackMetal);
-    box(profiles, [4.12, 0.074, 0.021], [0, 0.559, z - 0.065], blackMetal);
-    box(profiles, [4.12, 0.074, 0.021], [0, 0.559, z + 0.065], blackMetal);
-    box(profiles, [4.12, 0.008, 0.107], [0, 0.531, z], groove);
-  }
-  // Cross profiles show the pale aluminium faces and dark inner channels.
-  for (const x of xSupports) {
-    box(profiles, [0.125, 0.08, 2.62], [x, 0.65, 0], silver);
-    box(profiles, [0.165, 0.018, 2.62], [x, 0.698, 0], silverEdge);
-    box(profiles, [0.044, 0.006, 2.62], [x, 0.71, 0], groove);
-    for (const z of zSupports) cylinder(profiles, 0.021, 0.021, 0.013, [x + 0.045, 0.722, z], bolt, 8);
   }
 
   const woodMaps: Three.CanvasTexture[] = [];
@@ -234,26 +217,30 @@ function buildScene(three: ThreeModule, host: HTMLDivElement, onReady: () => voi
   const joistWood = material({ color: '#a8784e', map: woodMaps[6], bumpMap: woodMaps[6], bumpScale: 0.014, roughness: 0.88 });
   const joistEnd = material({ color: '#967044', roughness: 0.97 });
   const joists = groups.get(2)!;
-  for (let i = 0; i < 9; i++) {
-    const x = -1.85 + i * (3.7 / 8);
-    box(joists, [0.105, 0.125, 2.5], [x, 0.94, 0], [joistWood, joistWood, joistWood, joistWood, joistEnd, joistEnd]);
-    box(joists, [0.1, 0.009, 2.5], [x, 1.007, 0], groove);
+  // Joists run along Z; all terrace boards run along X, perpendicular to them.
+  // The 392 mm illustrated spacing is not a manufacturer-approved design.
+  for (const x of xSupports) {
+    box(joists, [0.06, 0.08, 2.5], [x, 0.16, 0], [joistWood, joistWood, joistWood, joistWood, joistEnd, joistEnd]);
+    box(joists, [0.06, 0.003, 2.5], [x, 0.2015, 0], groove);
   }
 
   const boards = groups.get(1)!;
-  const boardCount = 16;
-  const gap = 0.009;
-  const boardWidth = (2.5 - gap * (boardCount - 1)) / boardCount;
+  const boardCount = 17;
+  const gap = 0.005;
+  const nominalWidth = 0.145;
   for (let i = 0; i < boardCount; i++) {
+    const boardWidth = Math.min(nominalWidth, 2.5 - i * (nominalWidth + gap));
     const map = woodMaps[i % woodMaps.length];
-    const z = -1.25 + boardWidth / 2 + i * (boardWidth + gap);
+    const z = -1.25 + boardWidth / 2 + i * (nominalWidth + gap);
     const plank = material({ color: i % 3 === 0 ? '#c5b8a4' : '#dfdacd', map, bumpMap: map, bumpScale: 0.009, roughness: 0.81 });
     const end = material({ color: i % 2 ? '#946840' : '#ad7d4f', roughness: 0.91 });
-    box(boards, [4, 0.034, boardWidth], [0, 1.28, z], [end, end, plank, end, plank, plank]);
-    // Narrow edge chamfers are suggested by a lighter top edge and soft shadows.
-    box(boards, [4, 0.002, 0.002], [0, 1.298, z - boardWidth / 2 + 0.003], end);
-    for (const x of [-1.78, -0.89, 0, 0.89, 1.78]) {
-      cylinder(boards, 0.0045, 0.0045, 0.0015, [x, 1.298, z], bolt, 8);
+    box(boards, [4, 0.028, boardWidth], [0, 0.217, z], [end, end, plank, end, plank, plank]);
+    box(boards, [4, 0.001, 0.002], [0, 0.2315, z - boardWidth / 2 + 0.003], end);
+    // Visible fixings line up with the supporting joists beneath each board.
+    for (const x of xSupports) {
+      for (const edge of [-1, 1]) {
+        cylinder(boards, 0.003, 0.003, 0.001, [x, 0.2315, z + edge * Math.max(0.022, boardWidth / 2 - 0.025)], bolt, 8);
+      }
     }
   }
 
@@ -295,7 +282,7 @@ function buildScene(three: ThreeModule, host: HTMLDivElement, onReady: () => voi
   resize();
 
   const update = (assembled: boolean, layer: number) => {
-    const offsets: Record<SceneLayer, number> = assembled ? { 1: -0.38, 2: -0.155, 3: 0, 4: 0, 5: 0 } : { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    const offsets: Record<SceneLayer, number> = assembled ? { 1: 0, 2: 0, 3: 0, 4: 0 } : { 1: 0.53, 2: 0.27, 3: 0.08, 4: 0 };
     for (const [index, group] of groups) {
       group.position.y = offsets[index];
       group.traverse(object => {
@@ -397,8 +384,8 @@ export default function DeckScene2027({ active = true, assembled = false, layer 
   }, [assembled, layer]);
 
   const showModel = active && ready && !reducedMotion;
-  return <div className={`deck-scene-2027 ${showModel ? 'deck-scene-2027--ready' : ''} ${className}`} style={{ position: 'relative', width: '100%', height: '100%' }} role="img" aria-label={assembled ? 'Ilustračná 3D zostavená terasa s drevenými doskami a nosnou konštrukciou.' : 'Ilustračná rozložená konštrukcia terasy: dosky, rošt, nosné profily, terče a betónový podklad.'}>
-    <img src={asset(assembled ? 'deck-assembled-2027.webp' : 'deck-exploded-2027.webp')} alt="" width="1536" height="1024" decoding="async" fetchPriority={assembled ? 'auto' : 'high'} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', opacity: showModel ? 0 : 1 }} />
+  return <div className={`deck-scene-2027 ${showModel ? 'deck-scene-2027--ready' : ''} ${className}`} style={{ position: 'relative', width: '100%', height: '100%' }} role="img" aria-label={assembled ? 'Ilustračná 3D zostavená terasa s doskami, jedným kolmým roštom, terčmi a betónovým podkladom.' : 'Ilustračná rozložená konštrukcia terasy: dosky, jeden kolmý nosný rošt, terče a betónový podklad.'}>
+    <img src={asset(assembled ? 'deck-assembled-2027.webp' : 'deck-exploded-2027-v2.webp')} alt="" width="1536" height="1024" decoding="async" fetchPriority={assembled ? 'auto' : 'high'} style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', opacity: showModel ? 0 : 1 }} />
     <div ref={host} style={{ position: 'absolute', inset: 0, opacity: showModel ? 1 : 0, pointerEvents: 'none' }} aria-hidden="true" />
   </div>;
 }

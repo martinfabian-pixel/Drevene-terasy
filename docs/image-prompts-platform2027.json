@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-10",
+  "mode": "builtin",
+  "assets": [
+    {
+      "path": "public/images/deck-exploded-2027-v2.webp",
+      "sourceGeneratedPath": "C:/Users/marti/.codex/generated_images/01a126b2-504a-7853-9a2f-f1349d934417/exec-c65dfb0f-e843-4620-bf2b-c70571f9236a.png",
+      "input": "public/images/deck-exploded-2027.webp",
+      "prompt": "Use case: precise-object-edit.\nAsset type: transparent photoreal architectural exploded terrace construction hero asset for a Slovak website.\nInput image: edit target. Preserve the supplied realistic warm timber texture, concrete texture, camera angle above front left, rectangular proportions 4000 by 2500 mm, soft studio lighting, isolated composition and genuine transparent background.\nPrimary edit: simplify the construction to EXACTLY FOUR vertically separated layers:\n1. Top: warm wooden terrace boards, parallel along the 4000 mm length, about 28 mm thick and 145 mm wide.\n2. Directly below: ONE SINGLE LEVEL of eleven parallel wooden loadbearing joists, each running perpendicular to the boards across the 2500 mm depth. The joists must all be on the same height. No joist crosses another joist.\n3. Directly below each joist: four black adjustable terrace pedestals arranged in a line under THAT joist, supporting it directly, about 44 pedestals total. All pedestal heads on one level. The pedestals are the only supports between the joists and concrete.\n4. Bottom: ONE monolithic flat grey concrete slab.\nRemove ALL silver aluminum rails and ALL black longitudinal metal channels from the original. Remove every second or third crossed substructure layer. Absolutely no metal rails, no crossed grids, no transverse rails beneath the wooden joists, no duplicate wooden lattice, no extra support beams. Visible assembly must read boards -> single perpendicular wooden joist layer -> black pedestals -> concrete.\nKeep mild vertical exploded gaps between each of the four layers to explain the construction clearly, anatomically credible joist-to-pedestal alignment, natural contact shadows. Entire subject visible inside image with clean transparent margin; not cropped. No labels, text, dimension lines, logos, plants, house or people. This is an illustrative construction visualization, not a certified installation diagram.",
+      "transparent": true,
+      "purpose": "Illustrative four-layer hero fallback; not installation documentation"
+    }
+  ]
+}
