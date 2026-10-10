@@ -1,3 +1,5 @@
+> Aktualizácia: používateľ odmietol A/B/C. Aktuálny nový smer je tmavý remeselný prototyp podľa dodaného screenshotu Ostrolucky: hlavná stránka alebo #/atelier/domov. Stále Etapa 0, bez schválenia ďalšej etapy. Pôvodné koncepty sú v #/archiv. Podrobnosti: docs/novy-smer-ostrolucky.md.
+
 # Drevené terasy — Etapa 0
 
 Samostatný projekt pre slovenskú značku Drevené terasy. Tri dizajnové návrhy na schválenie; tento projekt zatiaľ nevykonáva objednávky, platby ani materiálové kalkulácie.
