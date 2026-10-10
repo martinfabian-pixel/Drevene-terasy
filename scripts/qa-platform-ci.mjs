@@ -55,7 +55,7 @@ try {
     await page.getByTestId('catalog-search').fill(''); await page.waitForFunction(count => document.querySelectorAll('.platform-product-grid article').length === count, allCount);
     await page.getByRole('button', { name: 'Thermowood', exact: true }).click(); await page.waitForFunction(count => document.querySelectorAll('.platform-product-grid article').length < count, allCount); assert.equal(await page.locator('.platform-product-grid article').count(), thermoProductCount);
     await page.getByRole('button', { name: 'Všetko', exact: true }).click(); await page.waitForFunction(count => document.querySelectorAll('.platform-product-grid article').length === count, allCount); await page.getByLabel('Porovnať materiál').first().check(); await page.getByRole('region', { name: 'Porovnanie materiálov' }).waitFor(); assert.equal(await page.getByRole('region', { name: 'Porovnanie materiálov' }).count(), 1);
-    await goto('/produkt/demo-massive'); assert.equal(await page.getByTestId('product-add-cart').count(), 0); assert.match(await page.locator('h1').innerText(), /NENÁJDENÉ/);
+    await goto('/produkt/demo-massive'); assert.equal(await page.getByTestId('product-add-cart').count(), 0); assert.match(await page.locator('h1').innerText(), /PRODUKT\s+NENÁJDENÝ/);
   });
   await check('source-priced product variant, area, cart persistence and removal', async () => {
     await goto(productRoute); await page.getByTestId('product-variant').selectOption(sourceVariant); await page.getByTestId('product-quantity').fill('3'); await page.getByTestId('product-add-cart').click();
