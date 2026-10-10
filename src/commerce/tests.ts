@@ -2,6 +2,7 @@ import { findProduct, piecesForArea, productCatalog, saleQuantity, type Product 
 import { getCartTotals, validProductQuantity, validateCart } from './cart-core';
 import { csvTemplate, exportProductCsv, importProductCsv, parseCsv } from './csv';
 import { validateRulesJson } from './rules-import';
+import { parseProjectAttachment } from './project-attachment';
 export function runCommerceTests() {
   let passed = 0;
   const check = (condition: boolean, description: string) => { if (!condition) throw new Error(description); passed++; };
@@ -33,5 +34,8 @@ export function runCommerceTests() {
   check(importProductCsv(csvTemplate.replace('"demo-import-4000"', '"bad id"')).errors.length > 0, 'Malformed variant IDs are rejected.');
   check(exportProductCsv([{ ...board, name: '=HYPERLINK("evil")' }]).includes('"\'=HYPERLINK'), 'CSV exports escape spreadsheet formula prefixes.');
   check(validateRulesJson({ verification: 'verified', source: 'https://example.com' }).rules === null, 'Partial verified rules cannot enter the engine.');
+  const project = { version: 1, input: { outline: [{ x: 0, y: 0 }, { x: 4000, y: 0 }, { x: 4000, y: 2500 }, { x: 0, y: 2500 }], holes: [], orientation: 'x', heightMm: 150, gapMm: 6, reservePercent: 5, productId: 'demo-massive', substrate: 'paving' } };
+  check(parseProjectAttachment(project)?.input.substrate === 'paving', 'Inquiry attachment preserves saved substrate type.');
+  check(parseProjectAttachment({ ...project, input: { ...project.input, substrate: 'unsupported-type' } }) === null, 'Invalid substrate in uploaded project is rejected.');
   return { passed, failed: 0 };
 }

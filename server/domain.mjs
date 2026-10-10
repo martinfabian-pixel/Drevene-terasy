@@ -57,7 +57,7 @@ export function validateProductCatalog(value) {
       if (variant.priceGross !== null && variant.vatRate === null) throw new ApiError(400, 'Price requires VAT rate.');
       let stock = null;
       if (variant.stock != null) {
-        if (!['available', 'preorder', 'unavailable'].includes(variant.stock.status) || !Number.isInteger(variant.stock.availableQuantity) || variant.stock.availableQuantity < 0 || variant.stock.availableQuantity > 10000000) throw new ApiError(400, 'Invalid structured stock.');
+        if (!['available', 'preorder', 'unavailable'].includes(variant.stock.status) || typeof variant.stock.availableQuantity !== 'number' || !Number.isFinite(variant.stock.availableQuantity) || variant.stock.availableQuantity < 0 || variant.stock.availableQuantity > 10000000 || variant.unit !== 'l' && !Number.isInteger(variant.stock.availableQuantity)) throw new ApiError(400, 'Invalid structured stock.');
         stock = { status: variant.stock.status, availableQuantity: variant.stock.availableQuantity };
       }
       return { id: variant.id, lengthMm: variant.lengthMm, widthMm: variant.widthMm, thicknessMm: variant.thicknessMm, unit: variant.unit, priceGross: variant.priceGross, vatRate: variant.vatRate,
@@ -73,14 +73,15 @@ export function calculateOrder(value, catalog) {
   const contact = validateInquiry({ contact: value.contact });
   const grouped = new Map();
   for (const item of value.items) {
-    if (!item || typeof item.productId !== 'string' || typeof item.variantId !== 'string' || !Number.isInteger(item.quantity) || item.quantity <= 0 || item.quantity > 100000) throw new ApiError(400, 'Invalid item.');
+    if (!item || typeof item.productId !== 'string' || typeof item.variantId !== 'string' || typeof item.quantity !== 'number' || !Number.isFinite(item.quantity) || item.quantity <= 0 || item.quantity > 100000) throw new ApiError(400, 'Invalid item.');
     const id = `${item.productId}:${item.variantId}`, previous = grouped.get(id);
     if (previous) previous.quantity += item.quantity; else grouped.set(id, { productId: item.productId, variantId: item.variantId, quantity: item.quantity });
   }
   const items = [...grouped.values()].map(item => {
-    if (!Number.isInteger(item.quantity) || item.quantity <= 0 || item.quantity > 100000) throw new ApiError(400, 'Invalid item quantity.');
+    if (!Number.isFinite(item.quantity) || item.quantity <= 0 || item.quantity > 100000) throw new ApiError(400, 'Invalid item quantity.');
     const product = catalog.find(row => row.id === item.productId), variant = product?.variants.find(row => row.id === item.variantId);
     if (!product || product.status !== 'verified' || !variant || variant.priceGross === null || variant.vatRate === null || variant.stock?.status !== 'available' || variant.stock.availableQuantity < item.quantity) throw new ApiError(409, 'Product is not confirmed and in stock for ordering.');
+    if (variant.unit !== 'l' && !Number.isInteger(item.quantity)) throw new ApiError(400, 'Physical pieces and packs require an integer quantity.');
     const units = variant.unit === 'bm' ? item.quantity * variant.lengthMm / 1000 : variant.unit === 'm²' ? item.quantity * variant.lengthMm * variant.widthMm / 1_000_000 : item.quantity;
     if (!Number.isFinite(units) || units <= 0) throw new ApiError(409, 'Missing sale dimensions.');
     const grossCents = Math.round(variant.priceGross * units * 100), netCents = Math.round(grossCents / (1 + variant.vatRate / 100));

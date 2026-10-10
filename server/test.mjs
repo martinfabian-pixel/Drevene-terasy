@@ -39,6 +39,10 @@ try {
   const product = { id: 'board', name: 'Verified test board', status: 'verified', variants: [{ id: 'board-4m', unit: 'ks', lengthMm: 4000, widthMm: 140, thicknessMm: 26, priceGross: 12.30, vatRate: 23, availability: 'Test inventory', stock: { status: 'available', availableQuantity: 100 } }] };
   const order = calculateOrder({ contact: { ...inquiry.contact, billingStreet: 'Test 1', billingCity: 'Test', billingPostcode: '00000' }, delivery: 'pickup', items: [{ productId: 'board', variantId: 'board-4m', quantity: 2, price: .01 }] }, [product]);
   check(order.grossCents === 2460 && order.netCents === 2000 && order.paymentStatus === 'not-initiated', 'Server recalculates price/VAT and ignores client price.');
+  const oil = { ...product, variants: [{ ...product.variants[0], unit: 'l', lengthMm: null, widthMm: null, thicknessMm: null }] };
+  const oilOrder = calculateOrder({ contact: { ...inquiry.contact, billingStreet: 'Test 1', billingCity: 'Test', billingPostcode: '00000' }, delivery: 'pickup', items: [{ productId: 'board', variantId: 'board-4m', quantity: .5 }] }, [oil]);
+  check(oilOrder.grossCents === 615, 'Fractional litres are accepted with exact monetary rounding.');
+  assert.throws(() => calculateOrder({ contact: inquiry.contact, items: [{ productId: 'board', variantId: 'board-4m', quantity: .5 }] }, [product])); passed++;
   assert.throws(() => calculateOrder({ contact: inquiry.contact, items: [{ productId: 'board', variantId: 'board-4m', quantity: 2 }] }, [{ ...product, status: 'demo' }])); passed++;
   process.stdout.write(`Backend tests: ${JSON.stringify({ passed, failed: 0 })}\n`);
 } finally { await new Promise(resolve => api.server.close(resolve)); await unlink(dataPath).catch(() => {}); }
