@@ -60,7 +60,8 @@ export function runCommerceTests() {
   const priceDraft = reviewStockCatalog([{ ...board, variants: [{ ...variant, priceGross: variant.priceGross! + 1 }] }], { allowPriceChanges: true });
   check(priceDraft.errors.length === 0 && priceDraft.changedArticleIds.length === 1 && productCatalog.find(product => product.id === board.id)?.variants[0].priceGross === variant.priceGross, 'Price update is a separate draft and leaves public source untouched.');
   check(reviewStockCatalog([board], { requireComplete: true }).errors.length > 0, 'A complete update cannot silently omit approved articles.');
-  check(validateLocalCatalog({ version: 1, products: productCatalog })?.length === productCatalog.length, 'Local JSON stock backup validates all records.');
+  const restoredStock = validateLocalCatalog({ version: 1, products: productCatalog });
+  check(restoredStock?.length === productCatalog.length && restoredStock.every(product => product.engineRules === null), 'Local JSON stock backup validates all records and preserves explicit null mounting rules.');
   check(validateRulesJson({ verification: 'verified', source: 'https://example.com' }).rules === null, 'Partial verified mounting rules cannot enter the engine.');
   const project = { version: 1, input: { outline: [{ x: 0, y: 0 }, { x: 4000, y: 0 }, { x: 4000, y: 2500 }, { x: 0, y: 2500 }], holes: [], orientation: 'x', heightMm: 150, gapMm: 6, reservePercent: 5, productId: board.id, variantId: variant.id, substrate: 'paving' } };
   check(parseProjectAttachment(project)?.input.substrate === 'paving', 'Inquiry attachment preserves source-backed product, variant and substrate.');

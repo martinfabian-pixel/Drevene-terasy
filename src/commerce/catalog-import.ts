@@ -18,7 +18,8 @@ export function validateLocalCatalog(value: unknown): Product[] | null {
       if (!product.images.length) return null;
       product.description = typeof raw.description === 'string' ? raw.description.slice(0, 10000) : product.description;
       product.relatedProductIds = Array.isArray(raw.relatedProductIds) ? raw.relatedProductIds.filter((id: unknown) => typeof id === 'string' && /^[a-z0-9_-]+$/.test(id)).slice(0, 100) : [];
-      if (raw.engineRules) { const result = validateRulesJson(raw.engineRules); if (!result.rules) return null; product.engineRules = result.rules; }
+      if (raw.engineRules !== undefined && raw.engineRules !== null) { const result = validateRulesJson(raw.engineRules); if (!result.rules) return null; product.engineRules = result.rules; }
+      else product.engineRules = null;
       // Restored technical values remain explicitly demo, never silently verified.
       if (raw.installationRules && raw.status === 'demo' && raw.installationRules.status === 'demo') {
         const rules = raw.installationRules;
