@@ -108,3 +108,7 @@ Pred aktiváciou treba dodať produktový export/cenník, montážne listy a kom
 - [Pôvodná implementácia schválenej titulky](docs/homepage-2027.html)
 - [Prompty titulky](docs/image-prompts-2027.json) a [aktualizovanej platformy](docs/image-prompts-platform2027.json)
 - Historické analýzy v `research/` a podklady v `docs/` opisujú staršie fázy; nepotvrdzujú aktuálne ceny, produkty alebo realizácie.
+
+## Overené nasadenie
+
+Aplikačný commit `6f27110de54950c34344e8bafbca5e014a1c4e63`: build, 102 výpočtových/commerce/backend testov, 93 responzívnych rozložení a všetky rozšírené prehliadačové kontroly prešli. [CI beh](https://github.com/martinfabian-pixel/Drevene-terasy/actions/runs/38071471953) obsahuje screenshoty, PDF a reporty. [Podrobný záznam a prevádzkové hranice](docs/implementation-platform-2027.html).
