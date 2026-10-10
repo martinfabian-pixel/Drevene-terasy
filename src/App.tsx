@@ -5,6 +5,7 @@ import Home from './Home';
 import { Catalog, ProductDetail } from './CatalogProduct';
 import Planner from './Planner';
 import Atelier from './Atelier';
+import Homepage2027 from './Homepage2027';
 import './home.css';
 import './catalog.css';
 import './planner.css';
@@ -71,7 +72,7 @@ function ConceptSite() {
  if(!concept)return <Navigate to="/" replace/>;
  return <div className={`concept concept-${concept}`}>{!embedded&&<ReviewToolbar concept={concept} view={view}/>}<SiteHeader concept={concept}/>{view==='domov'?<Home concept={concept}/>:view==='katalog'?<Catalog concept={concept}/>:view==='produkt'?<ProductDetail concept={concept}/>:view==='planovac'?<Planner concept={concept}/>:view==='identita'?<Identity concept={concept}/>:view==='realizacia'?<Service concept={concept}/>:view==='poradna'?<Advice concept={concept}/>:<Navigate to={`/${concept}/domov`} replace/>}<Footer concept={concept}/></div>;
 }
-export default function App(){return <Routes><Route path="/" element={<Atelier/>}/><Route path="/atelier/:view?" element={<Atelier/>}/><Route path="/archiv" element={<Comparison/>}/><Route path="/:concept/:view?" element={<ConceptSite/>}/><Route path="*" element={<Navigate to="/" replace/>}/></Routes>}
+export default function App(){return <Routes><Route path="/" element={<Homepage2027/>}/><Route path="/2027" element={<Homepage2027/>}/><Route path="/atelier/:view?" element={<Atelier/>}/><Route path="/archiv" element={<Comparison/>}/><Route path="/:concept/:view?" element={<ConceptSite/>}/><Route path="*" element={<Navigate to="/" replace/>}/></Routes>}
 
 // Named exports also support the offline, static design review export.
 export { Comparison, ConceptSite };

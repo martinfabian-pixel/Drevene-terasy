@@ -1,0 +1,33 @@
+{
+  "mode": "Built-in image_gen",
+  "date": "2026-10-10",
+  "prompts": [
+    {
+      "key": "exploded",
+      "transparent": true,
+      "prompt": "Use case: product-mockup. Asset type: isolated transparent fallback visual for a premium architectural terrace homepage, not a webpage. Create one hyperrealistic orthographic architectural exploded construction rendering of a rectangular timber terrace, proportions 4m long by 2.5m deep. View from front left above, deck long edges run from lower left to upper right, front edge from left foreground toward right. The deck dominates and occupies nearly the whole landscape frame. Clearly separated aligned horizontal layers: top warm brown natural wood planks with realistic grain and small gaps; underneath exposed perpendicular timber joists; below silver aluminum transverse framing and black open extrusion support rails, one rail extending to left; beneath 15 detailed black adjustable cylindrical terrace pedestals with flanged square feet; finally thick rectangular raw grey concrete slab. All layers structurally aligned, modest vertical separation, precise credible engineering and contact shadows on the concrete, cinematic photoreal materials, soft daylight from upper left. Realistic product render with no schematic cartoons. Entire model visible with only 4% transparent padding. No text, no dimension lines, no plants, no people, no backdrop, no logos, no watermark. Genuine alpha transparency, not a checkerboard printed in the image."
+    },
+    {
+      "key": "architecture",
+      "transparent": false,
+      "prompt": "Use case: photorealistic-natural. Asset type: wide architectural homepage photograph, no UI. A premium modern house with natural dark timber siding and full-height black framed glazing stands on the RIGHT of a large natural warm wood terrace. Camera low eye level from left looking along precise terrace boards towards right house, expansive wood terrace in lower half, quiet lounge chairs adjacent glazing mid-right, soft outdoor potted plants. Trees and forest hillside on left, late-afternoon warm light and natural subtle shadows. House has flat overhanging roof, clean sober architecture, no swimming pool, no human figures. Composition panoramic landscape about 2:1, wood terrace foreground, house right, sunlit green trees left, photographic realistic details and grain. Match refined European architectural terrace photography. No text, no logo, no claims, no watermark, no webpage content."
+    },
+    {
+      "key": "assembled",
+      "transparent": true,
+      "prompt": "Use case: product-mockup. Asset type: transparent architectural planner preview render, not UI. A photorealistic small rectangular 5.2m by 3.4m wooden terrace, fully assembled natural warm brown decking on slim charcoal metal edges, photographed orthographically from front left above. Long deck edge runs lower left to upper right. Terrace sits above thin grey architectural paving base. At back left three square dark grey pots with leafy small trees, front right two planters with fine ornamental grasses, no furniture and no house. Credible parallel individual wood boards, realistic grain and fine seams, premium architectural presentation with elegant contrast suited to a black webpage background. Render object fully visible in a wide landscape frame, 4% padding, transparent surrounding background, no ground plane beyond base. No text, no labels, no dimension lines, no logos, no watermark."
+    },
+    {
+      "key": "drevo",
+      "prompt": "Use case: product-mockup. Asset type: original photographic material texture for tall wood terrace category card. Macro architectural photograph of solid natural golden brown wooden terrace planks in diagonal parallel rows, fine open joints, subtle organic grain and small natural knots, warm sun grazing surface. Camera close above boards, material fills entire frame edge to edge. Believable European terrace photography, matte wood finish, refined texture, portrait composition. No environment, no people, no text, no logo, no watermark."
+    },
+    {
+      "key": "thermo",
+      "prompt": "Use case: product-mockup. Asset type: original photographic material texture for tall thermally modified wood terrace category card. Macro architectural photograph of dark warm chocolate brown thermally modified timber terrace decking in diagonal parallel rows, smooth surfaces with elongated delicate dark wood grain and thin black joints, matte natural texture, grazing light. Camera close above boards, full frame covered by timber, portrait composition, realistic precise plank edges. No text, no logo, no watermark, no furniture."
+    },
+    {
+      "key": "wpc",
+      "prompt": "Use case: product-mockup. Asset type: original photographic material texture for tall WPC terrace category card. Macro architectural photograph of charcoal grey WPC composite terrace boards in diagonal parallel rows, modern narrow grooves and subtle engineered embossed linear texture, clean straight dark gaps between identical manufactured planks, slate grey matte finish, soft grazing daylight. Composite polymer/wood material visibly uniform and distinct from natural wood, no organic knots. Full frame covered by board surface, portrait composition, extremely realistic close detail. No environment, no objects, no text, no logo, no watermark."
+    }
+  ]
+}
