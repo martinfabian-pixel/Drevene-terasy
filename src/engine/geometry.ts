@@ -108,7 +108,11 @@ export function shapeOutline(shape: DeckShape, widthMm = 4000, lengthMm = 2500, 
   const w = widthMm, h = shape === 'square' ? widthMm : lengthMm;
   const notchW = Math.min(w * 0.45, insetMm ?? w * 0.4), notchH = h * 0.45;
   if (shape === 'l') return [{x:0,y:0},{x:w,y:0},{x:w,y:h-notchH},{x:w-notchW,y:h-notchH},{x:w-notchW,y:h},{x:0,y:h}];
-  if (shape === 'u') return [{x:0,y:0},{x:w,y:0},{x:w,y:h},{x:w*0.7,y:h},{x:w*0.7,y:h*0.45},{x:w*0.3,y:h*0.45},{x:w*0.3,y:h},{x:0,y:h}];
+  if (shape === 'u') {
+    const left=(w-notchW)/2,right=(w+notchW)/2;
+    return [{x:0,y:0},{x:w,y:0},{x:w,y:h},{x:right,y:h},{x:right,y:h*0.45},
+      {x:left,y:h*0.45},{x:left,y:h},{x:0,y:h}];
+  }
   return [{x:0,y:0},{x:w,y:0},{x:w,y:h},{x:0,y:h}];
 }
 

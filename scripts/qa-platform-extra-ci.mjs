@@ -132,6 +132,7 @@ try {
     assert.ok(Number.isFinite(Date.parse(exported.createdAt)));
     assert.deepEqual(exported.contact, { ...contact, deliveryMode: 'delivery' });
     assert.equal(exported.items.length, 1); assert.equal(exported.items[0].variantId, 'demo-massive-140-4000'); assert.equal(exported.items[0].quantity, 3);
+    assert.equal(exported.lines.length, 1); assert.equal(exported.lines[0].variantId, 'demo-massive-140-4000'); assert.deepEqual(exported.lines[0].dimensionsMm, { length: 4000, width: 140, thickness: 26 }); assert.equal(exported.lines[0].physicalQuantity, 3); assert.equal(exported.lines[0].priceGross, null); assert.equal(exported.lines[0].subtotalGross, null);
     assert.match(exported.notice, /Nebol odoslaný/);
     assert.deepEqual(writes, [], 'No customer data may be sent to a server');
     const persisted = await storageText(page);
@@ -203,11 +204,11 @@ try {
   await check('admin gate, invalid and valid CSV, variants, photo, full JSON, backup and SPA catalog', async () => {
     const page = await newPage();
     await open(page, '/admin', page.getByRole('button', { name: 'OTVORIŤ LOKÁLNE DEMO →', exact: true }));
-    assert.equal(await page.getByLabel('Vybrať produkt', { exact: true }).count(), 0, 'Gate must precede editable demo data');
+    assert.equal(await page.locator('.platform-admin-products aside select').count(), 0, 'Gate must precede editable demo data');
     assert.equal(await page.locator('.platform-admin-gate').count(), 1);
     await page.getByRole('button', { name: 'OTVORIŤ LOKÁLNE DEMO →', exact: true }).click();
-    await page.getByLabel('Vybrať produkt', { exact: true }).waitFor();
-    const originalCount = await page.getByLabel('Vybrať produkt', { exact: true }).locator('option').count();
+    await page.locator('.platform-admin-products aside select').waitFor();
+    const originalCount = await page.locator('.platform-admin-products aside select').locator('option').count();
     await page.getByRole('button', { name: 'Objednávky a dopyty', exact: true }).click();
     await page.getByRole('heading', { name: 'Produkčné dáta sú chránené.', exact: true }).waitFor();
     await page.getByRole('button', { name: 'CSV import', exact: true }).click();
@@ -218,8 +219,8 @@ try {
     await page.getByRole('button', { name: 'OVERIŤ A IMPORTOVAŤ LOKÁLNE →', exact: true }).click();
     await page.getByRole('status').filter({ hasText: 'Neznáma kategória alebo jednotka.' }).waitFor();
     await page.getByRole('button', { name: 'Produkty a varianty', exact: true }).click();
-    assert.equal(await page.getByLabel('Vybrať produkt', { exact: true }).locator('option').count(), originalCount);
-    assert.equal(await page.getByLabel('Vybrať produkt', { exact: true }).locator('option[value="ci-board"]').count(), 0);
+    assert.equal(await page.locator('.platform-admin-products aside select').locator('option').count(), originalCount);
+    assert.equal(await page.locator('.platform-admin-products aside select').locator('option[value="ci-board"]').count(), 0);
     await page.getByRole('button', { name: 'CSV import', exact: true }).click();
     const csv = `${columns.join(';')}\n${row({})}\n${row({ variant_id: 'ci-board-5000', length_mm: 5000, price_gross_eur: '', vat_percent: '' })}\n${row({ product_id: 'ci-area-board', name: 'CI Area Board · DEMO', variant_id: 'ci-area-4000', width_mm: 140, unit: 'm²', price_gross_eur: 10, vat_percent: 23 })}\n`;
     await page.getByLabel('Vybrať CSV', { exact: true }).setInputFiles({ name: 'ci-products.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
@@ -227,7 +228,7 @@ try {
     await page.getByRole('button', { name: 'OVERIŤ A IMPORTOVAŤ LOKÁLNE →', exact: true }).click();
     await page.getByRole('status').filter({ hasText: '2 produktov importovaných iba do lokálneho demo stavu.' }).waitFor();
     await page.getByRole('button', { name: 'Produkty a varianty', exact: true }).click();
-    const productSelect = page.getByLabel('Vybrať produkt', { exact: true });
+    const productSelect = page.locator('.platform-admin-products aside select');
     await waitValue(productSelect, 'ci-board');
     assert.equal(await productSelect.locator('option').count(), originalCount + 2);
     const editedName = 'CI upravená terasa · DEMO';
@@ -242,7 +243,7 @@ try {
     await variantFields.getByLabel('Dĺžka mm', { exact: true }).fill('4100');
     await variantFields.getByLabel('Šírka mm', { exact: true }).fill('145');
     await variantFields.getByLabel('Hrúbka mm', { exact: true }).fill('28');
-    await variantFields.getByLabel('Jednotka predaja', { exact: true }).selectOption('ks');
+    await variantFields.getByRole('combobox').selectOption('ks');
     await page.getByLabel('Fotografia · vlastný demo náhľad', { exact: true }).setInputFiles(photo);
     await page.getByRole('status').filter({ hasText: 'Vložený obrázok pridaný do lokálneho náhľadu.' }).waitFor();
     await page.waitForFunction(expected => document.querySelector('.platform-admin-photo-preview')?.getAttribute('src') === expected, expectedPhotoUrl);
@@ -290,6 +291,7 @@ try {
     await open(page, '/kosik', page.getByTestId('cart-row'));
     assert.equal(await page.getByTestId('cart-row').count(), 1);
     assert.match(await page.getByTestId('cart-row').locator('strong').innerText(), /16,80/);
+    const areaQuote = await jsonDownload(page, () => page.getByRole('button', { name: 'EXPORT MATERIÁLOVÉHO ZOZNAMU ↓', exact: true }).click(), 'area-material-quote.json'); assert.equal(areaQuote.lines[0].unit, 'm²'); assert.equal(areaQuote.lines[0].physicalQuantity, 3); assert.equal(areaQuote.lines[0].saleQuantity, 1.68); assert.equal(areaQuote.lines[0].subtotalGross, 16.8);
     return { invalidCsvRejected: true, variants: edited.variants.length, imagePreserved: true, localBackupRestored: true, fileBackupRestored: true, productAvailableDuringSpaNavigation: true, areaUnitGrossEur: 16.8 };
   });
 
@@ -396,6 +398,30 @@ try {
     return { touchOrbitChangedCanvas: true, touchPinchChangedCanvas: true, dpr: dimensions.bufferWidth / dimensions.cssWidth, webglLossAndRetry: canLoseContext ? 'passed' : 'unsupported extension, not tested' };
   });
 
+
+  await check('saved project dimensions, custom resizing and square dimensions stay synchronized', async () => {
+    const page = await newPage();
+    await open(page, '/planovac', page.getByTestId('planner-page'));
+    await page.getByRole('button', { name: '02 Rozmery', exact: true }).click();
+    await page.getByTestId('planner-length').fill('5400'); await waitValue(page.getByTestId('planner-length'), '5400');
+    await page.getByTestId('planner-width').fill('3200'); await waitValue(page.getByTestId('planner-width'), '3200');
+    await page.getByTestId('planner-cutout').click();
+    await page.getByRole('button', { name: 'Uložiť návrh', exact: true }).click();
+    await page.getByTestId('planner-length').fill('4000'); await waitValue(page.getByTestId('planner-length'), '4000');
+    await page.getByRole('button', { name: 'Načítať uložený', exact: true }).click();
+    await waitValue(page.getByTestId('planner-length'), '5400'); await waitValue(page.getByTestId('planner-width'), '3200');
+    const before = await jsonDownload(page, () => page.getByRole('button', { name: 'Stiahnuť projekt JSON', exact: true }).click(), 'restored-project.json', 'moja-terasa.json');
+    assert.equal(before.input.holes.length, 1); assert.equal(before.input.outline.length, 4);
+    await page.getByTestId('planner-length').fill('6000'); await waitValue(page.getByTestId('planner-length'), '6000');
+    const resized = await jsonDownload(page, () => page.getByRole('button', { name: 'Stiahnuť projekt JSON', exact: true }).click(), 'resized-project.json', 'moja-terasa.json');
+    assert.equal(resized.input.holes.length, 1); assert.equal(resized.input.holes[0].length, 4); assert.equal(resized.input.outline.length, 4);
+    assert.equal(Math.max(...resized.input.outline.map(p => p.x)) - Math.min(...resized.input.outline.map(p => p.x)), 6000);
+    assert.ok(Math.abs(resized.input.holes[0][1].x - before.input.holes[0][1].x * 6000 / 5400) < 0.001);
+    await page.getByRole('button', { name: '01 Tvar', exact: true }).click(); await page.getByTestId('planner-shape-square').click();
+    await page.getByRole('button', { name: '02 Rozmery', exact: true }).click(); await waitValue(page.getByTestId('planner-width'), '6000');
+    await page.getByTestId('planner-width').fill('3800'); await waitValue(page.getByTestId('planner-width'), '3800'); await waitValue(page.getByTestId('planner-length'), '3800');
+    return { restoredBounds: [5400, 3200], resizedBounds: [6000, 3200], preservedHole: true, squareSide: 3800 };
+  });
   await check('actual planner print stylesheet and generated PDF', async () => {
     const page = await newPage();
     await open(page, '/planovac', page.getByTestId('planner-page'));

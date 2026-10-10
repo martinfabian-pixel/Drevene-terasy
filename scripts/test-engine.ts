@@ -19,6 +19,16 @@ test('Square, L and U shape construction',()=>{
   assert(polygonArea(shapeOutline('u',4000,2500))<10000000);
   for(const s of ['l','u'] as const) same(validateGeometry(shapeOutline(s,4000,2500)),[]);
 });
+test('U notch numeric width changes its centered geometry and exact area',()=>{
+  const narrow=shapeOutline('u',4000,2500,500),wide=shapeOutline('u',4000,2500,1500);
+  same(validateGeometry(narrow),[]);same(validateGeometry(wide),[]);
+  close(narrow[3].x-narrow[6].x,500);close(wide[3].x-wide[6].x,1500);
+  close((narrow[3].x+narrow[6].x)/2,2000);close((wide[3].x+wide[6].x)/2,2000);
+  close(polygonArea(narrow),10000000-500*2500*0.55);
+  close(polygonArea(wide),10000000-1500*2500*0.55);
+  close(polygonArea(shapeOutline('u',4000,2500)),10000000-1600*2500*0.55);
+  close(shapeOutline('u',4000,2500,3000)[3].x-shapeOutline('u',4000,2500,3000)[6].x,1800);
+});
 test('Self intersection rejects bow tie',()=>assert(validateGeometry([{x:0,y:0},{x:4000,y:2500},{x:0,y:2500},{x:4000,y:0}]).length>0));
 test('Nonconsecutive boundary touch rejected',()=>assert(validateGeometry([{x:0,y:0},{x:4000,y:0},{x:4000,y:2500},{x:2000,y:0},{x:0,y:2500}]).length>0));
 test('Duplicate adjacent vertices rejected',()=>assert(validateGeometry([...rect.slice(0,1),rect[0],...rect.slice(1)]).length>0));

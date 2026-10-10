@@ -3,6 +3,7 @@ import { getCartTotals, validProductQuantity, validateCart } from './cart-core';
 import { csvTemplate, exportProductCsv, importProductCsv, parseCsv } from './csv';
 import { validateRulesJson } from './rules-import';
 import { parseProjectAttachment } from './project-attachment';
+import { quoteLines } from './quote-lines';
 export function runCommerceTests() {
   let passed = 0;
   const check = (condition: boolean, description: string) => { if (!condition) throw new Error(description); passed++; };
@@ -37,5 +38,13 @@ export function runCommerceTests() {
   const project = { version: 1, input: { outline: [{ x: 0, y: 0 }, { x: 4000, y: 0 }, { x: 4000, y: 2500 }, { x: 0, y: 2500 }], holes: [], orientation: 'x', heightMm: 150, gapMm: 6, reservePercent: 5, productId: 'demo-massive', substrate: 'paving' } };
   check(parseProjectAttachment(project)?.input.substrate === 'paving', 'Inquiry attachment preserves saved substrate type.');
   check(parseProjectAttachment({ ...project, input: { ...project.input, substrate: 'unsupported-type' } }) === null, 'Invalid substrate in uploaded project is rejected.');
+  const unpricedLine = quoteLines(valid, productCatalog)[0];
+  check(unpricedLine.name === board.name && unpricedLine.physicalQuantity === valid[0].quantity && unpricedLine.dimensionsMm.length === variant.lengthMm && unpricedLine.subtotalGross === null && unpricedLine.subtotalVat === null && unpricedLine.manufacturer === null, 'Quote retains exact product/variant quantity and leaves unverified prices/manufacturer null.');
+  const areaPriced: Product = { ...priced, sourceUrls: ['https://example.com/verified-test-source'], variants: [{ ...priced.variants[0], unit: 'm²', priceGross: 24.6, vatRate: 23 }] };
+  const areaLine = quoteLines(valid, [areaPriced])[0];
+  check(areaLine.saleQuantity === 1.344 && areaLine.unit === 'm²' && areaLine.physicalQuantity === 4 && areaLine.physicalUnit === 'ks' && areaLine.subtotalGross === 33.06 && areaLine.subtotalNet === 26.88 && areaLine.subtotalVat === 6.18, 'Quote converts physical pieces to priced square metres with deterministic line VAT.');
+  check(areaLine.sourceUrls[0] === areaPriced.sourceUrls[0] && areaLine.profile === variant.profile && areaLine.color === variant.color && areaLine.vatRate === 23, 'Quote preserves variant attributes and provenance.');
+  check(quoteLines(valid, [{ ...areaPriced, variants: [{ ...areaPriced.variants[0], vatRate: null }] }])[0].subtotalNet === null, 'Quote never invents an unknown VAT rate.');
+  check(quoteLines(valid, [])[0].status === 'unavailable' && quoteLines(valid, [])[0].saleQuantity === null, 'Quote reports missing catalog items rather than dropping or fabricating rows.');
   return { passed, failed: 0 };
 }
