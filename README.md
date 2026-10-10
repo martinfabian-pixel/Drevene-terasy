@@ -1,6 +1,16 @@
-> Aktualizácia: používateľ odmietol A/B/C. Aktuálny nový smer je tmavý remeselný prototyp podľa dodaného screenshotu Ostrolucky: hlavná stránka alebo #/atelier/domov. Stále Etapa 0, bez schválenia ďalšej etapy. Pôvodné koncepty sú v #/archiv. Podrobnosti: docs/novy-smer-ostrolucky.md.
+# Drevené terasy — úvodná stránka 2027
 
-# Drevené terasy — Etapa 0
+Schválený vizuálny podklad: Fotka 3 (desktop) a Fotka 2 (mobil). Implementovaná je iba úvodná stránka. Hlavná route `/` a `#/2027`. Ďalšie stránky a funkčný plánovač čakajú na výslovné schválenie.
+
+- Samostatná vrstvená konštrukcia: fotorealistický prvý pohľad a Three.js po kliknutí na vrstvu.
+- Responzívna kompozícia, lokálne písmo Anton, ovládateľné menu, galéria a vizuálna ukážka plánovača.
+- Pôvodné koncepty, Atelier, dáta a prototypy zostávajú dostupné.
+- Fotografie sú označené AI ilustrácie; ceny, zákaznícke referencie a environmentálne tvrdenia sa nevymýšľajú.
+- TypeScript, build a skutočné React DOM browser QA sú súčasťou GitHub Actions.
+
+Podrobnosti: [Implementácia a overenie](docs/homepage-2027.html), [presné prompty vizuálov](docs/image-prompts-2027.json).
+
+## Archív Etapy 0
 
 Samostatný projekt pre slovenskú značku Drevené terasy. Tri dizajnové návrhy na schválenie; tento projekt zatiaľ nevykonáva objednávky, platby ani materiálové kalkulácie.
 
@@ -29,7 +39,7 @@ Používateľ doplnil [Holz und Design](https://holzunddesign-holzterrasse.de/) 
 
 ## Technológie prototypov
 
-React, TypeScript, Vite, React Router (hash trasy kompatibilné s GitHub Pages), vlastné responzívne CSS. Three.js/R3F, Zustand a výpočtový modul sú navrhnuté pre neskoršie schválené etapy. V Etape 0 nepridávame obchodný backend ani plnohodnotný 3D engine.
+React, TypeScript, Vite, React Router (hash trasy kompatibilné s GitHub Pages), vlastné responzívne CSS. Three.js/R3F, Zustand a výpočtový modul sú navrhnuté pre neskoršie schválené etapy. Obchodný backend a technicky overený plánovač zostávajú v budúcich etapách. Schválená homepage 2027 už má samostatnú Three.js ilustračnú konštrukciu.
 
 ## Lokálne spustenie
 
@@ -53,7 +63,9 @@ Samostatný repozitár: `martinfabian-pixel/Drevene-terasy`, predvolená vetva `
 
 Vite používa base `/Drevene-terasy/`. Verejné adresy (GitHub Actions build aj deploy úspešné 10. 10. 2026):
 
-- Porovnanie: `https://martinfabian-pixel.github.io/Drevene-terasy/`
+- Aktuálna homepage: `https://martinfabian-pixel.github.io/Drevene-terasy/#/2027`
+- Archív porovnania: `https://martinfabian-pixel.github.io/Drevene-terasy/#/archiv`
+- Starší Atelier: `https://martinfabian-pixel.github.io/Drevene-terasy/#/atelier/domov`
 - A: `https://martinfabian-pixel.github.io/Drevene-terasy/#/a/domov`
 - B: `https://martinfabian-pixel.github.io/Drevene-terasy/#/b/domov`
 - C: `https://martinfabian-pixel.github.io/Drevene-terasy/#/c/domov`

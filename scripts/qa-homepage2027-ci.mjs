@@ -57,6 +57,8 @@ async function loadImages(page) {
 }
 async function layout(page, width, suffix = '') {
   await page.setViewportSize({ width, height: width < 768 ? 900 : 1080 });
+  // Each viewport starts with a fresh React mount. Hash-only navigation otherwise preserves prior controls.
+  await page.goto('about:blank');
   await page.goto(url, { waitUntil: 'networkidle' });
   await page.locator('main').waitFor({ state: 'visible' });
   await loadImages(page);
