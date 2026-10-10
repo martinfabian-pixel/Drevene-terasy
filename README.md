@@ -39,17 +39,17 @@ npm run dev
 npm run build
 ```
 
-Produkčné závislosti sú zafixované na konkrétne verzie. Pred Etapou 2 doplníme a commitneme aj lockfile pre reprodukovateľné tranzitívne závislosti. V pracovnom prostredí Codex bol prístup k npm registry blokovaný; lokálny kompletný build preto nebol vykonaný. Workflow vykonáva kontrolu TypeScriptu a produkčný build na GitHub Actions.
+Produkčné závislosti sú zafixované na konkrétne verzie. Pred Etapou 2 doplníme a commitneme aj lockfile pre reprodukovateľné tranzitívne závislosti. V pracovnom prostredí Codex bol prístup k npm registry blokovaný; lokálny kompletný build preto nebol vykonaný. Workflow vykonáva kontrolu TypeScriptu a produkčný build na GitHub Actions. Oba kroky aj nasadenie úspešne prešli v [run 38060697149](https://github.com/martinfabian-pixel/Drevene-terasy/actions/runs/38060697149). Rozsah a hranice overenia sú v docs/stav-a-overenie.md.
 
 ## GitHub Pages
 
 Samostatný repozitár: `martinfabian-pixel/Drevene-terasy`, predvolená vetva `main`.
 
-1. Repozitár je založený samostatne; zdrojové súbory Etapy 0 sa nahrávajú do vetvy main.
+1. Repozitár je založený samostatne; zdrojové súbory Etapy 0 sú nahraté vo vetve main.
 2. Settings → Pages → Build and deployment → Source: **GitHub Actions**.
 3. Workflow `.github/workflows/pages.yml` vytvorí a nasadí frontend po každom push do `main`.
 
-Vite používa base `/Drevene-terasy/`. Plánované verejné adresy (platné až po úspešnom nasadení):
+Vite používa base `/Drevene-terasy/`. Verejné adresy (GitHub Actions build aj deploy úspešné 10. 10. 2026):
 
 - Porovnanie: `https://martinfabian-pixel.github.io/Drevene-terasy/`
 - A: `https://martinfabian-pixel.github.io/Drevene-terasy/#/a/domov`

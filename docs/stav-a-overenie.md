@@ -21,7 +21,7 @@
 
 ## Hranice overenia
 
-- Npm registry je v lokálnom prostredí neprístupná. Plný TypeScript semantic check a produkčný build musí potvrdiť GitHub Actions. Hook stubs nenahrádzajú test v reálnom React DOM.
+- GitHub Actions úspešne vykonal tsc -b a produkčný Vite build 7.1.12. Lokálna npm registry zostáva neprístupná. Hook stubs nenahrádzajú test všetkých interakcií v reálnom React DOM.
 - Mobilné šírky boli overené v Chrome; skutočný iPhone/Safari zatiaľ nebol testovaný.
 - Ceny, dostupnosť a technické údaje JAF nie sú overené: päť kategórií vrátilo HTTP 403. Sociálne profily neboli dostupné. Potrebujeme existujúce logo a autorizované fotografie značky.
 - Pri referenciách sa hodnotí dostupný verejný obsah. Presné vizuálne rozloženie, fonty, animácie a interné algoritmy sa nepodarilo overiť.
@@ -29,6 +29,14 @@
 
 ## Nasadenie a schválenie
 
-Repozitár s vetvou main je dostupný. Nahrávame zdroje Etapy 0 a následne overíme workflow a verejné stránky. Zverejnenie potvrdí až úspešné nasadenie. Ak Pages ešte nie je zapnuté, vlastník musí v Settings → Pages zvoliť Source: GitHub Actions; konektor nemá nástroj na zmenu tohto nastavenia.
+Zdroje Etapy 0 sú commitnuté vo vetve main: ba15eeb8fc7209b3e47dd93c038732d99d48272c. GitHub Actions run 38060697149 potvrdil success pre build aj deploy. GitHub Pages nasadenie je úspešné. Priame otvorenie verejnej stránky sa v tomto prostredí nepodarilo: web reader URL nenačítal a lokálna sieť odmietla socket. Reálny iPhone/Safari a verejné React interakcie preto musí doplniť manuálna kontrola používateľa.
+
+Overiteľný workflow: https://github.com/martinfabian-pixel/Drevene-terasy/actions/runs/38060697149
+
+Verejné adresy nasadených konceptov:
+- Porovnanie: https://martinfabian-pixel.github.io/Drevene-terasy/
+- A: https://martinfabian-pixel.github.io/Drevene-terasy/#/a/domov
+- B: https://martinfabian-pixel.github.io/Drevene-terasy/#/b/domov
+- C: https://martinfabian-pixel.github.io/Drevene-terasy/#/c/domov
 
 Po sprístupnení konceptov sa práca zastaví a čaká na výber a pripomienky používateľa. Etapa 1 sa nezačala; každý ďalší schvaľovací krok vyžaduje výslovné povolenie.
