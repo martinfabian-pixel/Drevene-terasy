@@ -43,8 +43,10 @@ const contexts = [];
 
 async function check(name, operation) {
   const startedAt = Date.now();
+  console.log(`START ${name}`);
+  let deadlineTimer;
   try {
-    const details = await operation();
+    const details = await Promise.race([operation(), new Promise((_, reject) => { deadlineTimer = setTimeout(() => reject(Object.assign(new Error(`Browser group exceeded 120 seconds: ${name}`), { browserDeadline: true })), 120_000); })]);
     report.checks.push({ name, passed: true, durationMs: Date.now() - startedAt, details });
     console.log(`PASS ${name}`);
   } catch (error) {
@@ -52,7 +54,8 @@ async function check(name, operation) {
     await latestPage?.screenshot({ path: join(output, screenshot), fullPage: false }).catch(() => {});
     report.failures.push({ name, error: error.stack || error.message, screenshot, durationMs: Date.now() - startedAt });
     console.error(`FAIL ${name}: ${error.message}`);
-  }
+    if (error.browserDeadline) throw error;
+  } finally { clearTimeout(deadlineTimer); }
 }
 async function newPage(options = {}) {
   const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, acceptDownloads: true, reducedMotion: 'reduce', ...options });
@@ -498,7 +501,11 @@ try {
     const desktop = await newPage({ viewport: { width: 1280, height: 900 } });
     await open(desktop, '/terasove-dosky', desktop.getByTestId('catalog-search'));
     await desktop.getByTestId(`product-${board.productId}`).waitFor();
-    await desktop.evaluate(async () => { await Promise.all([...document.images].map(image => image.decode().catch(() => {}))); });
+    // Images below the viewport remain lazy; their decode promises must not block a viewport screenshot.
+    await desktop.evaluate(async () => {
+      const visible = [...document.images].filter(image => { const rect = image.getBoundingClientRect(); return rect.width > 0 && rect.height > 0 && rect.top < innerHeight && rect.bottom > 0 && rect.left < innerWidth && rect.right > 0; });
+      await Promise.all(visible.map(async image => { let timer; try { await Promise.race([image.decode(), new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(`Visible image did not decode: ${image.src}`)), 5000); })]); if (!image.complete || !image.naturalWidth) throw new Error(`Visible image failed: ${image.src}`); } finally { clearTimeout(timer); } }));
+    });
     await screenshot(desktop, 'overview-1280-catalog.png');
     await mobile.getByTestId('planner-scene').scrollIntoViewIfNeeded();
     await screenshot(mobile, 'overview-402-planner.png');

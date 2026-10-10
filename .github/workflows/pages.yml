@@ -35,7 +35,7 @@ jobs:
       - name: Verify catalog, planner, cart and responsive platform
         run: npm run test:platform
       - name: Verify quote exports, demo administration, touch controls and WebKit
-        run: npm run test:platform-extra
+        run: timeout 420s npm run test:platform-extra
       - name: Save viewport screenshots and report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
