@@ -9,8 +9,8 @@ export default function PlatformShell() {
   const location = useLocation();
   const { catalog } = useCart();
   const body = useRef<HTMLDivElement>(null);
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [location.pathname]);
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
     const pages: Record<string, string> = { 'terasove-dosky': 'Terasové dosky', prislusenstvo: 'Príslušenstvo', planovac: 'Plánovač terás', realizacie: 'Realizácie', 'realizacia-na-kluc': 'Realizácia na kľúč', poradna: 'Poradňa', 'o-nas': 'O nás', kontakt: 'Kontakt', kosik: 'Košík', pokladna: 'Cenová ponuka', admin: 'Lokálna administrácia' };
     const section = location.pathname.split('/')[1];
     const product = section === 'produkt' ? catalog.find(p => p.id === location.pathname.split('/')[2]) : null;

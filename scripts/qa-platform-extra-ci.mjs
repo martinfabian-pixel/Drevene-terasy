@@ -238,7 +238,8 @@ try {
     await page.getByLabel('DPH · %', { exact: true }).first().fill('23');
     await page.getByLabel('Dostupnosť', { exact: true }).first().fill('DEMO – availability unverified');
     const variantFields = page.locator('fieldset').filter({ has: page.getByText('ci-board-4000', { exact: true }) });
-    await variantFields.getByLabel('Profil', { exact: true }).fill('Hladký CI profil');
+    const profileInput = variantFields.getByLabel('Profil', { exact: true }); await profileInput.scrollIntoViewIfNeeded(); const editScrollBefore = await page.evaluate(() => scrollY);
+    await profileInput.fill('Hladký CI profil'); await waitValue(profileInput, 'Hladký CI profil'); assert.ok(Math.abs(await page.evaluate(() => scrollY) - editScrollBefore) < 2, 'Editing the catalog must preserve scroll position');
     await variantFields.getByLabel('Farba', { exact: true }).fill('Grafit CI');
     await variantFields.getByLabel('Dĺžka mm', { exact: true }).fill('4100');
     await variantFields.getByLabel('Šírka mm', { exact: true }).fill('145');
