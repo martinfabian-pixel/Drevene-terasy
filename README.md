@@ -11,7 +11,7 @@ Používateľ schválil pokračovanie z titulky na katalóg, plánovač, košík
 - Katalóg desiatich kategórií, vyhľadávanie, filtre, zoradenie a porovnanie.
 - Detail produktu: profily, výrobné dĺžky, množstvo, plošný prepočet a plánovač s vybraným variantom.
 - Interaktívny 2D editor s presnými číselnými súradnicami, vrcholmi, výrezmi, kótami, vrstvami, zoomom a posúvaním. 3D model používa rovnaký vypočítaný návrh.
-- Oddelený deterministický výpočtový modul, materiálový zoznam a optimalizácia nárezov. Uloženie/otvorenie projektu, export JSON, tlač/uloženie PDF a košík.
+- Oddelený deterministický výpočtový modul, ukladanie projektov, export JSON a PDF. Aktuálne artikle majú presné rozmery a 2D/3D vizualizáciu; výpočet konštrukcie, nárezov a balíka do košíka vyžaduje montážne pravidlá, ktoré cenník neobsahuje.
 - Lokálny košík a dopytová pokladňa s fakturačnými údajmi, firmou, dopravou/odberom a rekapituláciou.
 - Realizácia na kľúč, kontakt, galéria označených vizualizácií, O nás a deväť poradenských článkov s primárnymi zdrojmi.
 - Lokálne administračné návrhy: nemenný verejný skladový program, CSV/JSON aktualizácie cien na kontrolu, vlastné fotografie/náhľady, explicitné lokálne zálohy a príprava obsahu. Nové artikle vyžadujú samostatné schválenie.
@@ -99,19 +99,27 @@ Node.js builtins: scrypt heslá, náhodné HttpOnly/SameSite sessions, autorizá
 
 Server vyžaduje `DATA_ENCRYPTION_KEY`, `ADMIN_USER`, `ADMIN_PASSWORD_SCRYPT`, `ALLOWED_ORIGINS`; žiadne tajomstvá nie sú v projekte. Vývoj sa viaže iba na loopback. Produkčná administrácia má byť na rovnakom HTTPS origin ako backend. Verejné `#/admin` je iba lokálne demo bez prístupu k serverovým záznamom.
 
-Reálne objednávky potrebujú zároveň `COMMERCE_OWNER_APPROVED=yes` a `COMMERCE_LIVE=yes`, potvrdený serverový katalóg, ceny, DPH a štruktúrované zásoby. Príjem dopytov vyžaduje `ACCEPT_INQUIRIES=yes`. Frontendové prepínače sú predvolene vypnuté; server rozhoduje autoritatívne. Platobná brána nie je nakonfigurovaná ani simulovaná.
+Aktuálna skladová politika blokuje reálne objednávky aj pri `COMMERCE_OWNER_APPROVED=yes` a `COMMERCE_LIVE=yes`: PDF neobsahuje sadzby DPH ani potvrdené aktuálne zásoby. Pred aktiváciou treba odborné overenie, auditovanú aktualizáciu politiky a bezpečné nasadenie backendu. Príjem dopytov vyžaduje `ACCEPT_INQUIRIES=yes`. Frontendové prepínače sú predvolene vypnuté; server rozhoduje autoritatívne. Platobná brána nie je nakonfigurovaná ani simulovaná.
 
-Pred aktiváciou treba dodať produktový export/cenník, montážne listy a kompatibilitu, firemné kontakty/údaje, vlastné fotografie, právne texty, backend hosting/TLS, zálohy a monitoring. Reálny predaj vyžaduje výslovné schválenie majiteľa. [Prevádzkové kroky a hranice](docs/platform.html).
+Cenník a skladový sortiment sú importované. Pred aktiváciou treba potvrdiť sadzby DPH a aktuálnu dostupnosť; doplniť montážne listy a kompatibilitu, firemné kontakty/údaje, vlastné fotografie, právne texty, backend hosting/TLS, zálohy a monitoring. Reálny predaj vyžaduje výslovné schválenie majiteľa. [Prevádzkové kroky a hranice](docs/platform.html).
 
 ## Dokumentácia a archív
 
-- [Aktuálna platforma a prevádzkové hranice](docs/platform.html)
+- [Aktuálny skladový program a audit všetkých 137 artiklov](docs/stock-program-2026-10-10.html)
+- [Backend: ochrana schváleného sortimentu a podmienky aktivácie](docs/backend-stock-policy.html)
+- [Platforma a prevádzkové hranice](docs/platform.html)
 - [Výpočtový modul](docs/calculations.html)
 - [Analýza plánovačov](docs/planner-references-platform.html)
 - [Pôvodná implementácia schválenej titulky](docs/homepage-2027.html)
 - [Prompty titulky](docs/image-prompts-2027.json) a [aktualizovanej platformy](docs/image-prompts-platform2027.json)
 - Historické analýzy v `research/` a podklady v `docs/` opisujú staršie fázy; nepotvrdzujú aktuálne ceny, produkty alebo realizácie.
 
-## Overené nasadenie
+## Predchádzajúce overené nasadenie
 
 Aplikačný commit `6f27110de54950c34344e8bafbca5e014a1c4e63`: build, 102 výpočtových/commerce/backend testov, 93 responzívnych rozložení a všetky rozšírené prehliadačové kontroly prešli. [CI beh](https://github.com/martinfabian-pixel/Drevene-terasy/actions/runs/38071471953) obsahuje screenshoty, PDF a reporty. [Podrobný záznam a prevádzkové hranice](docs/implementation-platform-2027.html).
+
+## Overené nasadenie skladového programu / 10. 10. 2026
+
+Aplikačný commit `f8fce0d3db404a00235022bb05a3291d7b791ae5`: TypeScript/Vite build, 1 107 kontrol PDF sortimentu, 134 výpočtových/plánovacích/importných testov, 50 commerce testov a 47 backend testov prešli. Prešlo 93 responzívnych rozložení, všetkých 137 verejných produktových variantov a 15 rozšírených skupín kontrol vrátane WebKit pri šírkach 375 a 402 px, dotykového 2D/3D, obnovy záloh a importu budúceho cenového manifestu. WebKit je automatizované overenie, nie fyzický iPhone.
+
+[Úspešný CI beh a nasadenie](https://github.com/martinfabian-pixel/Drevene-terasy/actions/runs/38074243529). [Aktualizovaný katalóg](https://martinfabian-pixel.github.io/Drevene-terasy/?v=jaf-stock-20261010#/terasove-dosky). Snímky viewportov boli vizuálne skontrolované. Bez montážnych listov sa konštrukčný kusovník a nárezy neodhadujú; platby a reálne objednávky sú stále vypnuté.
