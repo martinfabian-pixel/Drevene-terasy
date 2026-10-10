@@ -190,3 +190,6 @@
 @media(max-width:800px){.arch2027 .arch2027-title-green{transform:perspective(1000px) rotateY(10deg) rotateZ(-8deg) scaleX(.71) scaleY(.78)}}
 
 @media(min-width:801px){.arch2027 .arch2027-hero-number{top:.4vw}}
+
+/* Decorative preview may overlap the hero visually; controls remain clickable. */
+.arch2027 .arch2027-planner-model{pointer-events:none}

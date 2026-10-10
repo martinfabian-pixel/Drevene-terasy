@@ -29,5 +29,13 @@
       "key": "wpc",
       "prompt": "Use case: product-mockup. Asset type: original photographic material texture for tall WPC terrace category card. Macro architectural photograph of charcoal grey WPC composite terrace boards in diagonal parallel rows, modern narrow grooves and subtle engineered embossed linear texture, clean straight dark gaps between identical manufactured planks, slate grey matte finish, soft grazing daylight. Composite polymer/wood material visibly uniform and distinct from natural wood, no organic knots. Full frame covered by board surface, portrait composition, extremely realistic close detail. No environment, no objects, no text, no logo, no watermark."
     }
-  ]
+  ],
+  "assets": {
+    "exploded": "public/images/deck-exploded-2027.webp",
+    "architecture": "public/images/architecture-home-2027.webp",
+    "assembled": "public/images/deck-assembled-2027.webp",
+    "drevo": "public/images/material-drevo-2027.webp",
+    "thermo": "public/images/material-thermo-2027.webp",
+    "wpc": "public/images/material-wpc-2027.webp"
+  }
 }
