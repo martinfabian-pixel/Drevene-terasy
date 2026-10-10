@@ -1,42 +1,37 @@
-# Stav Etapy 0 a rozsah overenia
+# Aktuálny stav Etapy 0 – nový tmavý návrh
 
 10. 10. 2026
 
-## Pripravené
+Používateľ odmietol pôvodné A/B/C a dodal screenshot a odkazy Ostrolucky. Nová hlavná stránka preto používa originálny tmavý remeselný smer. Pôvodné návrhy sú zachované v /archiv. Nejde o schválenie dizajnu ani Etapy 1.
 
-- Tri odlišné responzívne koncepty A/B/C: titulka, katalóg, šesť produktových detailov, plánovač, realizácia, poradňa a paleta s typografiou.
-- Spoločné porovnanie s prepnutím konceptu a desktopového/mobilného náhľadu.
-- Samostatná React/TypeScript aplikácia a oddelené demo produkty; návrh dátového kontraktu, backendu, administrácie a výpočtového modulu pre budúce schválené etapy.
-- Aktualizované titulky podľa preferencie atmosféry a fotografií Holz und Design. Štyri originálne AI vizuály, jasne označené. Nejde o zákaznícke realizácie ani dodávateľské fotografie.
-- GitHub Actions workflow pre TypeScript, produkčný Vite build a GitHub Pages. Skutočný názov nového samostatného repozitára je martinfabian-pixel/Drevene-terasy; base aplikácie zodpovedá veľkému D.
-- Offline export 43 stránok. Je určený na posúdenie dizajnu; plné demo ovládanie je v React zdrojoch.
+## Nový prototyp
 
-## Lokálne overenie
+Titulka, katalóg s demo filtrami a vyhľadávaním, šesť produktových detailov, geometrické demo plánovača, realizácia s lokálnym formulárom a paleta/typografia.
 
-- Esbuild spracoval TS/TSX zdroje a vyrenderoval statické náhľady.
-- Headless Chrome skontroloval 22 základných stránok pri šírkach 1440, 768, 390 a 320 px: 88 kombinácií. Bez pretekania celej stránky, chýbajúcich obrázkov a JS chýb. Horizontálne kategórie na mobile sa posúvajú zámerne.
-- Prepnutie konceptov a mobilného náhľadu, mobilné menu a lokálne odkazy sú funkčné.
-- Trinásť izolovaných kontrol handlerov s hook stubmi pokrýva plochu, validáciu rozmerov, 2D/3D, materiál, vrstvy, reset, vyhľadávanie, prázdne kategórie, príslušenstvo, všetky produktové detaily a prepnutie C titulky.
-- Vizuálne kontrolované desktopové a mobilné screenshoty. Kontrola zdrojov nenašla konkrétnu zrejmú chybu strict TypeScriptu; doplnené sú landmarky a klávesové ovládanie tabov.
+Nové súbory: src/Atelier.tsx, src/atelier.css, public/images/atelier-grain-v1.webp.
+Referencia a presný prompt nového vizuálu: docs/novy-smer-ostrolucky.md.
+Zdrojový commit: 6e9617c7023d02821a1db3f0816503beac41bb25.
+GitHub Actions: https://github.com/martinfabian-pixel/Drevene-terasy/actions/runs/38061954171.
 
-## Hranice overenia
+## Overenie
 
-- GitHub Actions úspešne vykonal tsc -b a produkčný Vite build 7.1.12. Lokálna npm registry zostáva neprístupná. Hook stubs nenahrádzajú test všetkých interakcií v reálnom React DOM.
-- Mobilné šírky boli overené v Chrome; skutočný iPhone/Safari zatiaľ nebol testovaný.
-- Ceny, dostupnosť a technické údaje JAF nie sú overené: päť kategórií vrátilo HTTP 403. Sociálne profily neboli dostupné. Potrebujeme existujúce logo a autorizované fotografie značky.
-- Pri referenciách sa hodnotí dostupný verejný obsah. Presné vizuálne rozloženie, fonty, animácie a interné algoritmy sa nepodarilo overiť.
-- Plánovač počíta iba geometrickú plochu obdĺžnika. Počet ilustrovaných dosiek nie je kusovník; ceny a materiálové pravidlá čakajú na overené produkty.
+- Statický export 55 stránok vrátane historických návrhov.
+- Nový návrh: šesť hlavných stránok × šírky 1440, 768, 390 a 320 px = 24 kombinácií. Bez pretekania celej stránky, chýbajúcich obrázkov alebo JS chýb.
+- Vizuálne prezreté desktopové a mobilné screenshoty novej titulky.
+- Dvadsaťdva izolovaných kontrol zdrojových handlerov prešlo. Zahŕňajú pôvodnú geometriu a validácie, nové menu, galériu v oboch smeroch, kombináciu filtrov a vyhľadávania, prázdny výsledok, všetky produktové ID, dokumenty a lokálny formulár.
+- GitHub Actions potvrdil úspešný tsc -b a produkčný Vite build.
+- Job deploy úspešne dokončil nasadenie na GitHub Pages. Nasadený commit je 6e9617c7023d02821a1db3f0816503beac41bb25.
 
-## Nasadenie a schválenie
+## Hranice
 
-Zdroje Etapy 0 sú commitnuté vo vetve main: ba15eeb8fc7209b3e47dd93c038732d99d48272c. GitHub Actions run 38060697149 potvrdil success pre build aj deploy. GitHub Pages nasadenie je úspešné. Priame otvorenie verejnej stránky sa v tomto prostredí nepodarilo: web reader URL nenačítal a lokálna sieť odmietla socket. Reálny iPhone/Safari a verejné React interakcie preto musí doplniť manuálna kontrola používateľa.
+Kontroly handlerov používajú hook stubs; nenahrádzajú kompletný test v React DOM. Mobilné šírky boli overené v Chrome, skutočný iPhone/Safari zatiaľ nie. Priame otvorenie verejnej stránky je v tomto prostredí nedostupné; lokálna sieť nepovoľuje socket.
 
-Overiteľný workflow: https://github.com/martinfabian-pixel/Drevene-terasy/actions/runs/38060697149
+Materiály sú demo bez vymyslených cien a parametrov. Ilustrácie sú označené AI a nie sú fotografiami zákazníckych realizácií. Logo je pracovné. Overené produkty JAF, existujúce logo, kontakty a autorizované fotografie treba doplniť z podkladov značky.
 
-Verejné adresy nasadených konceptov:
-- Porovnanie: https://martinfabian-pixel.github.io/Drevene-terasy/
-- A: https://martinfabian-pixel.github.io/Drevene-terasy/#/a/domov
-- B: https://martinfabian-pixel.github.io/Drevene-terasy/#/b/domov
-- C: https://martinfabian-pixel.github.io/Drevene-terasy/#/c/domov
+Plánovač počíta plochu obdĺžnika; ilustrácie dosiek nie sú kusovník. Formulár nič neodosiela. Žiadne platby ani objednávky nie sú aktívne.
 
-Po sprístupnení konceptov sa práca zastaví a čaká na výber a pripomienky používateľa. Etapa 1 sa nezačala; každý ďalší schvaľovací krok vyžaduje výslovné povolenie.
+## Schválenie
+
+Po odovzdaní tohto nového prototypu čakáme na pripomienky a výslovné rozhodnutie používateľa. Etapa 1 sa nezačala.
+
+Adresa: https://martinfabian-pixel.github.io/Drevene-terasy/#/atelier/domov
