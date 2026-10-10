@@ -1,47 +1,69 @@
-# Drevené terasy — úvodná stránka 2027
+# Drevené terasy
 
-Schválený vizuálny podklad: Fotka 3 (desktop) a Fotka 2 (mobil). Implementovaná je iba úvodná stránka. Hlavná route `/` a `#/2027`. Ďalšie stránky a funkčný plánovač čakajú na výslovné schválenie.
+Existujúci projekt **martinfabian-pixel/Drevene-terasy**. Dizajnový smer Experimental Architectural Commerce 2027: biela, čierna, limetkovozelená, monumentálna typografia a technické 2D/3D zobrazenie.
 
-- Samostatná vrstvená konštrukcia: fotorealistický prvý pohľad a Three.js po kliknutí na vrstvu.
-- Responzívna kompozícia, lokálne písmo Anton, ovládateľné menu, galéria a vizuálna ukážka plánovača.
-- Pôvodné koncepty, Atelier, dáta a prototypy zostávajú dostupné.
-- Fotografie sú označené AI ilustrácie; ceny, zákaznícke referencie a environmentálne tvrdenia sa nevymýšľajú.
-- TypeScript, build a skutočné React DOM browser QA sú súčasťou GitHub Actions.
+Používateľ schválil pokračovanie z titulky na katalóg, plánovač, košík a ďalšie stránky. Predchádzajúce koncepty sú zachované v archíve; ich historické schvaľovacie pravidlá neopisujú aktuálny stav.
 
-Podrobnosti: [Implementácia a overenie](docs/homepage-2027.html), [presné prompty vizuálov](docs/image-prompts-2027.json).
+## Aktuálny rozsah
 
-## Archív Etapy 0
+- Responzívna titulka a jednotná navigácia, menu, košík a pätička.
+- Opravená ilustračná konštrukcia: dosky → jeden kolmý nosný rošt → terče → betón. Fotorealistický prvý pohľad a samostatný Three.js model.
+- Katalóg desiatich kategórií, vyhľadávanie, filtre, zoradenie a porovnanie.
+- Detail produktu: profily, výrobné dĺžky, množstvo, plošný prepočet a plánovač s vybraným variantom.
+- Interaktívny 2D editor s presnými číselnými súradnicami, vrcholmi, výrezmi, kótami, vrstvami, zoomom a posúvaním. 3D model používa rovnaký vypočítaný návrh.
+- Oddelený deterministický výpočtový modul, materiálový zoznam a optimalizácia nárezov. Uloženie/otvorenie projektu, export JSON, tlač/uloženie PDF a košík.
+- Lokálny košík a dopytová pokladňa s fakturačnými údajmi, firmou, dopravou/odberom a rekapituláciou.
+- Realizácia na kľúč, kontakt, galéria označených vizualizácií, O nás a deväť poradenských článkov s primárnymi zdrojmi.
+- Funkčné lokálne administračné demo: produkty, varianty, ceny, fotografie/náhľady, dostupnosť, CSV/JSON, explicitné lokálne zálohy a príprava obsahu.
+- Pripravený oddelený backend a API klient. Server, produkčná administrácia, prijímanie zákazníckych údajov, platby a reálne objednávky **nie sú aktivované**.
 
-Samostatný projekt pre slovenskú značku Drevené terasy. Tri dizajnové návrhy na schválenie; tento projekt zatiaľ nevykonáva objednávky, platby ani materiálové kalkulácie.
+## Trasy
 
-## Návrhy
+Základ: [Drevené terasy](https://martinfabian-pixel.github.io/Drevene-terasy/). Hash smerovanie je kompatibilné s GitHub Pages.
 
-- A — Premium Nature: prirodzená farebnosť, serifová typografia, veľké ilustračné fotografie.
-- B — Architectural Studio: výrazná typografia, architektonický rytmus, technické grafické prvky.
-- C — Interactive Design Experience: návrh terasy ako prvý krok, interaktívne vizuálne rozhranie.
+| Trasa | Obsah |
+| --- | --- |
+| `#/` alebo `#/2027` | Domov |
+| `#/terasove-dosky` | Katalóg dosiek |
+| `#/masivne-drevo`, `#/thermowood`, `#/wpc-terasy` | Kategórie |
+| `#/prislusenstvo` | Príslušenstvo |
+| `#/produkt/demo-massive` | Demo detail a varianty |
+| `#/planovac` | 2D/3D plánovač |
+| `#/kosik`, `#/pokladna` | Košík a lokálny dopyt |
+| `#/realizacie`, `#/realizacia-na-kluc` | Inšpirácia a služby |
+| `#/poradna`, `#/o-nas`, `#/kontakt` | Obsah |
+| `#/admin` | Jasne označené lokálne demo |
+| `#/pravne-informacie` | Podklady na odborné schválenie |
+| `#/archiv`, `#/atelier/domov`, `#/a/domov`, `#/b/domov`, `#/c/domov` | Staršie návrhy |
 
-Každý obsahuje titulku, katalóg, produktový detail, rozhranie plánovača, realizáciu, návrh poradenskej sekcie a paletu s typografiou. Spoločná stránka obsahuje porovnanie a mobilný náhľad.
+## Údaje a hranice výpočtov
 
-Po výbere konceptu nasleduje Etapa 1 a druhé schválenie. Bez výslovného súhlasu sa ďalšia etapa nezačne.
+- Päť zadaných kategórií JAF pri automatickom čítaní vracia HTTP 403. Bez CSV/cenníka a technických listov sa aktuálny sortiment, ceny a dostupnosť neuvádzajú ako overené.
+- Seedovaný katalóg obsahuje **DEMO** produkty. Rozmery a montážne hodnoty sú demonštračné. Ceny, výrobca, dostupnosť a dokumenty sú nevyplnené, kým sa nedodajú overené údaje.
+- Vložené architektonické a materiálové vizualizácie projektu sú označené AI ilustrácie, nie fotografie realizácií firmy. Obrázok vložený používateľom v lokálnom deme má samostatný neutrálny popis pôvodu.
+- Instagram/Facebook neboli dostupné na automatickú analýzu. Firemné kontakty, vlastné fotografie, realizácie ani hodnotenia sa nevymýšľajú.
+- Plánovač rozlišuje geometriu, demo výpočet a technicky overený montážny profil. Nepodporená geometria, podklad, neplatný pôdorys alebo nekompletné pravidlá vedú k vysvetleniu a zablokovaniu príslušného kusovníka. [Podrobné hranice](docs/calculations.html).
+- Tlač do PDF využíva prehliadač; tento náhľad neposkytuje serverový PDF archív.
+- Dopyty sú lokálne súbory na stiahnutie. Údaje ani fotografie sa neposielajú firme. Kontaktné údaje sa automaticky neukladajú v prehliadači.
 
-### Aktuálna dizajnová preferencia
+## Moduly
 
-Používateľ doplnil [Holz und Design](https://holzunddesign-holzterrasse.de/) a označil jeho celkovú atmosféru a fotografie za obľúbený smer. V Etape 0 preto posilňujeme fotografické sekcie a prirodzenú atmosféru vo všetkých troch návrhoch. Žiadny koncept zatiaľ nebol vybraný. Podrobnosti: `docs/dizajnovy-smer.md` a `research/holzunddesign.md`.
+| Súbor/modul | Zodpovednosť |
+| --- | --- |
+| `src/PlatformShell.tsx` | Navigácia, menu, pätička, právny náhľad |
+| `src/Homepage2027.tsx`, `src/DeckScene2027.tsx` | Titulka a ilustračná konštrukcia |
+| `src/PlatformPages.tsx`, `src/platform-pages.css` | Katalóg, detail, košík, pokladňa, obsah, lokálne admin |
+| `src/commerce/catalog.ts` | Produkty, varianty, základné prepočty |
+| `src/commerce/cart-core.ts`, `cart.tsx` | Košík, ceny/DPH, validácia množstiev |
+| `src/commerce/csv.ts`, `catalog-import.ts`, `rules-import.ts` | CSV/JSON a montážne pravidlá |
+| `src/commerce/api.ts` | Pripravený HTTPS klient; komerčné prepínače vypnuté |
+| `src/engine/` | Geometria, kusovník, montážne pravidlá a nárezy |
+| `src/Planner2027.tsx`, `src/PlannerScene2027.tsx` | 2D editor a synchronizovaný Three.js model |
+| `server/` | Oddelené API a šifrovaný perzistentný dátový súbor |
 
-## Obsah a dôveryhodnosť
+Existujúci stack: React, TypeScript, Vite, React Router, Three.js a vlastné responzívne CSS. Ďalší stavový/CSS framework sa nepridáva iba kvôli prepisu fungujúceho projektu.
 
-- Existujúce profily Instagram/Facebook sa nepodarilo načítať. Logo a farebnosť sú pracovným návrhom, nie overenou existujúcou identitou.
-- Kategórie JAF vrátili HTTP 403. Produkty sú označené DEMO. Ceny, rozmery, výrobca, dostupnosť a technické listy zostávajú prázdne. Žiadna technická hodnota sa neodvodzuje z ilustračného obrázka.
-- Štyri vizuály terás boli vytvorené nástrojom Imagegen a nie sú fotografiami našich realizácií.
-- Materiálové ilustrácie sú vlastné CSS/SVG kresby. Nepreberáme fotografie či databázu dodávateľa.
-- Rozhranie plánovača počíta iba geometrickú plochu obdĺžnika. Počet zobrazených dosiek a nosníkov je dekoratívny, nie výpočet kusovníka.
-- Dopytový formulár je lokálna ukážka; žiadny obsah sa neodosiela a fotografie sa nenahrávajú na server.
-
-## Technológie prototypov
-
-React, TypeScript, Vite, React Router (hash trasy kompatibilné s GitHub Pages), vlastné responzívne CSS. Three.js/R3F, Zustand a výpočtový modul sú navrhnuté pre neskoršie schválené etapy. Obchodný backend a technicky overený plánovač zostávajú v budúcich etapách. Schválená homepage 2027 už má samostatnú Three.js ilustračnú konštrukciu.
-
-## Lokálne spustenie
+## Spustenie a testy
 
 Node.js 24:
 
@@ -49,34 +71,40 @@ Node.js 24:
 npm install
 npm run dev
 npm run build
+npm run test:engine
+npm run test:commerce
+npm run test:server
+npx playwright install --with-deps chromium webkit
+npm run test:homepage
+npm run test:platform
+npm run test:platform-extra
 ```
 
-Produkčné závislosti sú zafixované na konkrétne verzie. Pred Etapou 2 doplníme a commitneme aj lockfile pre reprodukovateľné tranzitívne závislosti. V pracovnom prostredí Codex bol prístup k npm registry blokovaný; lokálny kompletný build preto nebol vykonaný. Workflow vykonáva kontrolu TypeScriptu a produkčný build na GitHub Actions. Oba kroky aj nasadenie úspešne prešli v [run 38060697149](https://github.com/martinfabian-pixel/Drevene-terasy/actions/runs/38060697149). Rozsah a hranice overenia sú v docs/stav-a-overenie.md.
+Browser testy spúšťajú vlastný lokálny server nad `dist/`; najprv vykonajte build. Testujú responzivitu a hlavné používateľské interakcie. Čisté commerce testy overujú jednotky, DPH, blokovanie demo predaja, CSV, pravidlá a prílohy projektu. Backend testy používajú dočasnú konfiguráciu na loopback adrese; nevykonávajú produkčné operácie.
+
+Priame závislosti sú zafixované verziami v `package.json`. Pracovné prostredie Codex nemá prístup k npm registry; úplný TypeScript/Vite build a skutočné React DOM testy sa vykonávajú v GitHub Actions. Zdrojové/static testy nie sú náhradou týchto kontrol.
 
 ## GitHub Pages
 
-Samostatný repozitár: `martinfabian-pixel/Drevene-terasy`, predvolená vetva `main`.
+Workflow `.github/workflows/pages.yml` vykoná build, výpočtové/commerce/backend testy a Playwright overenie. Nasadenie prebehne až po úspešných kontrolách. Screenshoty a reporty sú CI artifact.
 
-1. Repozitár je založený samostatne; zdrojové súbory Etapy 0 sú nahraté vo vetve main.
-2. Settings → Pages → Build and deployment → Source: **GitHub Actions**.
-3. Workflow `.github/workflows/pages.yml` vytvorí a nasadí frontend po každom push do `main`.
+Vite base je **/Drevene-terasy/**. Veľkosť písmen názvu je dôležitá pre assety. Pages hostuje iba frontend, nikdy zákaznícku databázu ani platobný backend.
 
-Vite používa base `/Drevene-terasy/`. Verejné adresy (GitHub Actions build aj deploy úspešné 10. 10. 2026):
+## Backend a aktivácia
 
-- Aktuálna homepage: `https://martinfabian-pixel.github.io/Drevene-terasy/#/2027`
-- Archív porovnania: `https://martinfabian-pixel.github.io/Drevene-terasy/#/archiv`
-- Starší Atelier: `https://martinfabian-pixel.github.io/Drevene-terasy/#/atelier/domov`
-- A: `https://martinfabian-pixel.github.io/Drevene-terasy/#/a/domov`
-- B: `https://martinfabian-pixel.github.io/Drevene-terasy/#/b/domov`
-- C: `https://martinfabian-pixel.github.io/Drevene-terasy/#/c/domov`
+Node.js builtins: scrypt heslá, náhodné HttpOnly/SameSite sessions, autorizácia správcu, CSRF pre zmeny, origin allowlist, rate limity, validácia, idempotencia a AES-256-GCM šifrovanie.
 
-## Analýza a architektúra
+Server vyžaduje `DATA_ENCRYPTION_KEY`, `ADMIN_USER`, `ADMIN_PASSWORD_SCRYPT`, `ALLOWED_ORIGINS`; žiadne tajomstvá nie sú v projekte. Vývoj sa viaže iba na loopback. Produkčná administrácia má byť na rovnakom HTTPS origin ako backend. Verejné `#/admin` je iba lokálne demo bez prístupu k serverovým záznamom.
 
-- `research/referencie-dizajn.md`
-- `research/referencie-planovace.md`
-- `research/znacka-sortiment.md`
-- `docs/architektura.md`
-- `docs/vizualy.md`
-- `public/docs/analyza.html`
+Reálne objednávky potrebujú zároveň `COMMERCE_OWNER_APPROVED=yes` a `COMMERCE_LIVE=yes`, potvrdený serverový katalóg, ceny, DPH a štruktúrované zásoby. Príjem dopytov vyžaduje `ACCEPT_INQUIRIES=yes`. Frontendové prepínače sú predvolene vypnuté; server rozhoduje autoritatívne. Platobná brána nie je nakonfigurovaná ani simulovaná.
 
-Analýzy odlišujú dostupný obsah od neovereného správania. Statické offline exporty sú určené na posúdenie vzhľadu; ich ovládacie prvky nemenia návrh. Funkčné demo ovládanie je súčasťou React zdrojov a musí sa overiť po dostupnosti závislostí.
+Pred aktiváciou treba dodať produktový export/cenník, montážne listy a kompatibilitu, firemné kontakty/údaje, vlastné fotografie, právne texty, backend hosting/TLS, zálohy a monitoring. Reálny predaj vyžaduje výslovné schválenie majiteľa. [Prevádzkové kroky a hranice](docs/platform.html).
+
+## Dokumentácia a archív
+
+- [Aktuálna platforma a prevádzkové hranice](docs/platform.html)
+- [Výpočtový modul](docs/calculations.html)
+- [Analýza plánovačov](docs/planner-references-platform.html)
+- [Pôvodná implementácia schválenej titulky](docs/homepage-2027.html)
+- [Prompty titulky](docs/image-prompts-2027.json) a [aktualizovanej platformy](docs/image-prompts-platform2027.json)
+- Historické analýzy v `research/` a podklady v `docs/` opisujú staršie fázy; nepotvrdzujú aktuálne ceny, produkty alebo realizácie.

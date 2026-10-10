@@ -11,6 +11,7 @@
     "test:homepage": "node scripts/qa-homepage2027-ci.mjs",
     "test:engine": "node scripts/test-engine.mjs",
     "test:platform": "node scripts/qa-platform-ci.mjs",
+    "test:platform-extra": "node scripts/qa-platform-extra-ci.mjs",
     "test:commerce": "node server/test-commerce.mjs",
     "test:server": "node server/test.mjs"
   },
