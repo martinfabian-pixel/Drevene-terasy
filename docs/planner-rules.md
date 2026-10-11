@@ -79,3 +79,7 @@ Piazza technical s. 1–2: koeficient 4 × 10^-5 /°C, teplota materiálu. 4000 
 Lunawood údržba (3 s.) a Guideline for Professionals CZE (4 s.) slúžia na hranice použitia a budúci obsah. Rozpor v odporúčaní tlakovej vody sa nevyriešil publikovaním univerzálnej rady; novší terasový návod ju neodporúča. ADLER aplikačný list (1 s.) obsahuje pracovné a údržbové postupy vrátane zaobchádzania s olejovými handrami. Neodvodzujeme z neho spotrebu oleja bez výdatnosti konkrétneho výrobku. Žiadne odborné články teraz nepublikujeme.
 
 Úplný zoznam 11 súborov, počty strán a SHA-256: technical-source-inventory.json. Originály, renderované schémy a plné texty nie sú súčasťou publikovaného repozitára.
+
+## Doplnenie HPM TEC RAPI-TEC
+
+Pozri [rapitec-rules.md](rapitec-rules.md): výhradne technická referencia 2026-08.1, aplikácia na konkrétny spoj a evidencia rozporov. Sortiment JAF ostáva uzamknutý.

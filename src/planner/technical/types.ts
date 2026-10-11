@@ -1,9 +1,11 @@
+import type { Exposure, ReferenceFamily, FastenerReference } from './rapitec';
 import type { Point } from '../../engine/types';
 export type Verification = 'verified' | 'requiresReview' | 'unknown';
 export interface Evidence { document: string; pages: number[]; year: number | null; note?: string }
 export interface Rule<T> { value: T | null; status: Verification; sources: Evidence[] }
 export type FixingSystem = 'visible' | 'profix-x' | 'profix-x2' | 'dila' | 'juan' | 'ligo-s47' | 'ligo-s34' | 'upm';
 export interface TechnicalOptions {
+ exposure?: Exposure; fastenerReference?: ReferenceFamily; increasedLoad?: boolean;
  fixing?: FixingSystem; joistArticle?: string; joistFlat?: boolean;
  perimeterGapMm?: number; jointGapMm?: number; sawKerfMm?: number; trimEachEndMm?: number;
  spacerMm?: number; moisturePercent?: number; pool?: boolean; drainageConfirmed?: boolean;
@@ -22,6 +24,7 @@ export interface TechnicalStock { productId: string; variantId: string; article:
 export interface TechnicalContext { profile: TechnicalProfile; boardStock: TechnicalStock[]; accessories: TechnicalStock[] }
 export interface Connection { boardId: string; joistId: string; position: Point; kind: 'visible' | 'hidden'; count: number }
 export interface TechnicalReport {
+ fastenerReference?: FastenerReference;
  version: string; structuralVerification: 'requiresReview'; profile: TechnicalProfile;
  options: Required<Omit<TechnicalOptions,'moisturePercent'>> & {moisturePercent: number | null};
  assumptions: string[]; sources: Evidence[]; connections: Connection[];

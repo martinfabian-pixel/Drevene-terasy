@@ -624,6 +624,22 @@ try {
     return {sourceRules:true,doubleJoists:true,noInventedPedestals:true,exactClipPack:true,projectRoundTrip:true};
   });
 
+  await check('RAPI-TEC reference stays outside commerce and persists exposure', async()=>{
+    const page=await newPage({viewport:{width:402,height:874},isMobile:true,hasTouch:true});
+    const fixture=fixtures.find(v=>v.articleNumber==='55954/2183');
+    await open(page,'/planovac?product='+fixture.productId+'&variant='+fixture.variantId,page.getByTestId('planner-page'));
+    await page.getByRole('button',{name:'04 Konštrukcia',exact:true}).click();
+    await page.getByText('Pokročilé technické nastavenia',{exact:true}).click();
+    await page.getByTestId('technical-reference').selectOption('plus');
+    await page.getByTestId('technical-exposure').selectOption('chlorine');
+    await page.getByRole('button',{name:'06 Výsledok',exact:true}).click();
+    assert.match(await page.getByTestId('fastener-reference').innerText(),/Mimo sortimentu, bez ceny/);
+    assert.match(await page.getByTestId('fastener-reference').innerText(),/Nevhodná/);
+    const saved=await jsonDownload(page,()=>page.getByRole('button',{name:'Stiahnuť projekt JSON',exact:true}).click(),'rapitec-project.json','moja-terasa.json');
+    assert.equal(saved.input.technical.exposure,'chlorine');assert.equal(saved.input.technical.fastenerReference,'plus');
+    return {referenceOnly:true,environmentPersisted:true};
+  });
+
   await check('no application runtime or non-WebGL console errors', async () => {
     assert.deepEqual(report.pageErrors, []);
     assert.deepEqual(report.consoleErrors.filter(error => !/webgl|swiftshader|gpu process|context[_ ]lost/i.test(error.message)), []);
