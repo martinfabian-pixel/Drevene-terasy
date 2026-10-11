@@ -12,7 +12,7 @@
 
 - Jedna knižnica a dve úrovne čítania; tri kategórie, vyhľadávanie v celom existujúcom texte s normalizáciou diakritiky a odkazom na zodpovedajúcu kapitolu, indexované URL.
 - Obrazovkový čítač všetkých šiestich manuálov z pôvodných dát: kapitoly, montážny postup, protokol, výrobky, zdroje. URL `chapter` a `level` zachovajú výber a históriu.
-- Navigácia kapitol na desktope; kompaktný výber a predchádzajúci/ďalší krok na mobile. Bez hromadného vykresľovania všetkých kapitol.
+- Navigácia kapitol na desktope; kompaktný výber a predchádzajúci/ďalší krok na mobile. Bez hromadného vykresľovania všetkých kapitol. Priamy odkaz otvorí a posunie na zodpovedajúcu kapitolu; montážny postup manuálu 04 je uvedený iba raz.
 - Odborné detaily a zdroje sú rozbaliteľné. Podstatné obmedzenia a rozpory z odborných odsekov zostávajú viditeľné aj v základnom režime.
 - Samostatný technický katalóg z `boardRows`/`technicalProfile`. Vyhľadávanie názvu, SKU, rozmeru, dreviny a systému; iba údaje pôvodného registra.
 - Vybraný variant v manuáli, zdroje jednotlivých pravidiel, presný odkaz do plánovača. Katalógová cena sa nezamieňa za potvrdenú dostupnosť.
