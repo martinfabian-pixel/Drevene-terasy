@@ -1,0 +1,7 @@
+import { useState, useMemo } from 'react';
+import { compareAssemblies } from './technical/compare';
+import type { EngineProduct, PlanInput } from '../engine/types';
+export function AssemblyComparison({input,product}:{input:PlanInput;product:EngineProduct}){
+ const [open,setOpen]=useState(false);const rows=useMemo(()=>open?compareAssemblies(input,product):[],[open,input,product]);
+ return <details data-testid="assembly-comparison" onToggle={e=>setOpen(e.currentTarget.open)}><summary>Porovnať ekonomickú a prémiovú skladbu</summary><p>Porovnanie predbežných variantov. Žiadna zostava zatiaľ nie je staticky schválená. Ceny zahŕňajú len vypočítané položky; podpery a chýbajúce systémové prvky nie sú nulové náklady.</p>{rows.length?<div className="planner-table-wrap"><table><thead><tr><th>Podklad</th><th>Voľná výška</th><th>Čiastkový súčet s DPH</th><th>Stav</th></tr></thead><tbody>{rows.map(r=><tr key={r.article}><td>{r.article}<br/>{r.premiumPreference?'Hliníkový variant — prémiová preferencia':r.economyCandidate?'Drevený variant — nižší porovnateľný súčet':'Drevený variant'}</td><td>{r.clearanceMm} mm</td><td>{r.subtotalGross===null?'Nevyčíslené':r.subtotalGross.toLocaleString('sk-SK',{style:'currency',currency:'EUR'})}</td><td>{r.status==='blocked'?'Prekážka v zvolenej skladbe':'Vyžaduje odborné overenie'}<details><summary>Dôvody a chýbajúce položky</summary><ul>{r.reasons.map((s,i)=><li key={i}>{s}</li>)}</ul></details></td></tr>)}</tbody></table></div>:<p>Nie sú doložené porovnateľné podkladové systémy pre tento profil.</p>}</details>;
+}

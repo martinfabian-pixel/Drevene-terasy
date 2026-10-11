@@ -1,3 +1,4 @@
+import { runAssemblyTests } from './test-assembly';
 import { runRapitecTests } from './test-rapitec';
 import { runTechnicalTests } from './test-technical';
 import { runStockManifestImportTests } from './test-stock-manifest-import';
@@ -285,3 +286,5 @@ console.log(JSON.stringify(runStockManifestImportTests(), null, 2));
 console.log(JSON.stringify(runTechnicalTests(), null, 2));
 
 console.log(JSON.stringify(runRapitecTests(),null,2));
+
+console.log(JSON.stringify(runAssemblyTests(),null,2));

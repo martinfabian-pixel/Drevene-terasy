@@ -640,6 +640,22 @@ try {
     return {referenceOnly:true,environmentPersisted:true};
   });
 
+  await check('exact stock screw selection and constrained assembly comparison',async()=>{
+    const page=await newPage({viewport:{width:402,height:874},isMobile:true,hasTouch:true});
+    const fixture=fixtures.find(v=>v.articleNumber==='55954/2183');
+    await open(page,'/planovac?product='+fixture.productId+'&variant='+fixture.variantId,page.getByTestId('planner-page'));
+    await page.getByRole('button',{name:'04 Konštrukcia',exact:true}).click();
+    await page.getByTestId('technical-screw').selectOption('55013/0569');
+    await page.getByTestId('assembly-comparison').locator('summary').first().click();
+    assert.match(await page.getByTestId('assembly-comparison').innerText(),/Čiastkový súčet/);
+    assert.match(await page.getByTestId('assembly-comparison').innerText(),/55016\/0008/);
+    await page.getByTestId('planner-add-cart').click();
+    await open(page,'/kosik',page.getByRole('button',{name:'EXPORT MATERIÁLOVÉHO ZOZNAMU ↓',exact:true}));
+    const quote=await jsonDownload(page,()=>page.getByRole('button',{name:'EXPORT MATERIÁLOVÉHO ZOZNAMU ↓',exact:true}).click(),'assembly-quote.json');
+    assert.ok(JSON.stringify(quote).includes('55013/0569'));
+    return {exactStockScrew:true,comparison:true};
+  });
+
   await check('no application runtime or non-WebGL console errors', async () => {
     assert.deepEqual(report.pageErrors, []);
     assert.deepEqual(report.consoleErrors.filter(error => !/webgl|swiftshader|gpu process|context[_ ]lost/i.test(error.message)), []);

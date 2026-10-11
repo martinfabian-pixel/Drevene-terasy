@@ -1,3 +1,4 @@
+import { assessFasteners } from './fasteners';
 import { evaluateRapitec, hpm } from './rapitec';
 import { bounds, clipPolygonX, EPSILON, isOrthogonal, lineIntervals, offsetOrthogonal, polygonArea, roundMm, validateGeometry } from '../../engine/geometry';
 import { optimizeStock } from '../../engine/stock';
@@ -44,7 +45,7 @@ export function calculateTechnicalPlan(input:PlanInput,product:EngineProduct,bas
  if(options.fixing==='visible'&&profile.sideGap.value!==null&&input.gapMm<profile.sideGap.value||options.fixing.startsWith('profix')&&profile.sideGap.value!==null&&Math.abs(input.gapMm-profile.sideGap.value)>.01||options.fixing==='ligo-s47'&&(input.gapMm<5||input.gapMm>6)){
   warn('gap-outside-rules','Škára nezodpovedá vybranému systému. Lunawood vyžaduje najmenej 6 mm; klip Profix v tomto návrhu 6 mm; LIGO približne 5–6 mm.',profile.sideGap.sources[0]??source,'error');return finish();
  }
- if(profile.material!=='wpc'&&profile.sideGap.value===null){
+ if(!profile.material.startsWith('WPC')&&profile.sideGap.value===null){
   if(options.moisturePercent===16&&input.gapMm+EPSILON<profile.widthMm*.06){warn('moisture-gap','Pri zadanej vlhkosti 16 % je škára menšia než 6 % šírky dosky podľa JAF. Uprav škáru alebo dolož produktový montážny predpis.',jaf(27),'error');return finish();}
   warn('moisture-review','Bočnú aj čelnú škáru treba potvrdiť podľa nameranej vlhkosti a konkrétneho profilu. Hodnota v návrhu nie je všeobecným odporúčaním.',jaf(27));
  }
@@ -59,6 +60,7 @@ export function calculateTechnicalPlan(input:PlanInput,product:EngineProduct,bas
  const joistHeight=aluminium?30:options.joistFlat?joist.thicknessMm:joist.widthMm;
  const spacer=options.fixing==='visible'?options.spacerMm:0;
  if(options.joistFlat)warn('joist-orientation','Položenie hranola naplocho nie je všeobecne zakázané. Over prierez, únosnosť, lepené spoje vodorovne a ochranu styčnej plochy; plocha nad 50 mm potrebuje konštrukčné oddelenie.',jaf(27));
+ if(options.fixing!=='visible')warn('hidden-height-review','Výška klipu a jeho skrutky nie je zahrnutá ako overená stavebná výška. Čistú výšku roštu, klipu a dosky musí potvrdiť montážny detail.',source);
  const clearance=input.heightMm-profile.thicknessMm-joistHeight-spacer;
  const ventilation=input.substrate==='soil'?profile.minVentilationSoil:profile.minVentilationConcrete;
  if(clearance<0||ventilation.value!==null&&clearance<ventilation.value)warn('low-height','Dostupná výška nestačí na zvolený rošt a požadované odvetranie. Individuálne posúdenie: preveriť nižší kovový systém, odvodnenie alebo úpravu podkladu; nejde o automatické zamietnutie terasy.',ventilation.sources[0]??source);
@@ -141,12 +143,11 @@ export function calculateTechnicalPlan(input:PlanInput,product:EngineProduct,bas
   else{result.joistStock=joistPlan.stock;addStock(result.joistStock,compatibleJoists,'joists');}
   for(const b of pieces)for(const j of supportFor(b))report.connections.push({boardId:b.id,joistId:j.id,position:mapPoint({x:j.start.x,y:(contact(b,j)!.low+contact(b,j)!.high)/2}),kind:options.fixing==='visible'?'visible':'hidden',count:options.fixing==='visible'?2:1});
   if(options.fixing==='visible'){
-   const narrow=pieces.some(b=>b.widthMm<2*(profile.sideFixingOffset.value??15)+1);
+   const narrow=pieces.some(b=>supportFor(b).some(j=>{const span=contact(b,j);return !span||span.high-span.low<2*(profile.sideFixingOffset.value??15)+1;}));
    if(narrow)warn('narrow-rip','Pozdĺžne zúženie dosky neumožňuje oba odstupy skrutiek od hrán. Úzky diel vyžaduje zmenu rozloženia alebo vlastný detail.',source);
    const required=report.connections.reduce((n,c)=>n+c.count,0);
-   const minimum=profile.sideGap.sources.some(s=>s.document.includes('LUNAWOOD'))?2.5*(profile.thicknessMm+spacer):2.5*profile.thicknessMm+spacer;
-   const screwCandidates=[{article:'55013/0291',length:60,pack:200},{article:'55013/0134',length:70,pack:200}];
-   const screw=!aluminium&&!narrow?screwCandidates.find(s=>s.length>=minimum&&s.length<=profile.thicknessMm+spacer+joistHeight&&context.accessories.some(a=>a.article===s.article)):undefined;
+   const assessments=assessFasteners(context,options,joistHeight,required);Object.assign(report,{fasteners:assessments});
+   const screw=!narrow?assessments.filter(s=>s.status==='candidate'&&(options.screwArticle==='auto'||s.article===options.screwArticle)).sort((a,b)=>(a.totalGross??Infinity)-(b.totalGross??Infinity)||a.length-b.length||a.article.localeCompare(b.article))[0]:undefined;
    if(screw){const v=context.accessories.find(v=>v.article===screw.article)!;result.materials.push({key:'fixings',id:'fixings:'+v.article,article:v.article,productId:v.productId,variantId:v.variantId,name:'Skrutky A4 · '+v.article,quantity:Math.ceil(required/screw.pack),unit:'bal',requiredPieces:required,packagePieces:screw.pack,verified:false});}
    else{report.missingItems.push('Skrutky: '+required+' ks spojovacích bodov; presný variant a dĺžku potvrdiť.');warn('screw-review','Počet skrutiek je odvodený z prienikov dosiek a nosníkov, ale vhodná skladová skrutka pre túto skladbu nie je doložená. Nepridáva sa nesprávny artikel.',jaf(22));}
   }else{
@@ -158,6 +159,7 @@ export function calculateTechnicalPlan(input:PlanInput,product:EngineProduct,bas
     for(const j of joists){const rows=new Map<number,BoardPiece[]>();for(const b of pieces)if(supportFor(b).some(s=>s.id===j.id))rows.set(b.row,[...(rows.get(b.row)??[]),b]);
      for(const [row,list] of rows)for(const a of list)for(const b of rows.get(row+1)??[]){const aa=contact(a,j)!,bb=contact(b,j)!;if(Math.abs(bb.low-aa.high-input.gapMm)<.1)interiorClips++;}
     }
+    Object.assign(report,{hiddenCoverage:{interior:interiorClips,boundaryLocations:Math.max(0,report.connections.length*2-interiorClips*2),complete:false as const}});
     const pack=clipArticle==='55985/0003'?200:clipArticle==='55985/0007'?100:80;
     if(interiorClips)result.materials.push({key:'fixings',id:'fixings:'+clip.article,article:clip.article,productId:clip.productId,variantId:clip.variantId,name:'Vnútorné klipy · '+clip.article,quantity:Math.ceil(interiorClips/pack),unit:'bal',requiredPieces:interiorClips,packagePieces:pack,verified:false});
     report.missingItems.push('Štart, koniec, orezané bočné drážky a spojovacie skrutky nie sú zahrnuté do počtu vnútorných klipov.');

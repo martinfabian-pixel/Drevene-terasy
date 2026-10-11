@@ -83,3 +83,7 @@ Lunawood údržba (3 s.) a Guideline for Professionals CZE (4 s.) slúžia na hr
 ## Doplnenie HPM TEC RAPI-TEC
 
 Pozri [rapitec-rules.md](rapitec-rules.md): výhradne technická referencia 2026-08.1, aplikácia na konkrétny spoj a evidencia rozporov. Sortiment JAF ostáva uzamknutý.
+
+## Dokončovanie skladového kotvenia a porovnanie
+
+Pozri [planner-completion-status.md](planner-completion-status.md). Register deviatich presných artiklov je v fasteners.ts, porovnanie používa rovnaký výpočtový model a neoznačuje čiastkovú cenu za kompletnú skladbu.

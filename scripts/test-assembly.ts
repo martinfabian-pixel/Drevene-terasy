@@ -1,0 +1,24 @@
+import { scenario } from './test-technical';
+import { productCatalog } from '../src/commerce/catalog';
+import { toEngineProduct } from '../src/planner/catalog-adapter';
+import { shapeOutline } from '../src/engine';
+import { compareAssemblies } from '../src/planner/technical/compare';
+import { parseTechnicalOptions } from '../src/planner/technical/options';
+export function runAssemblyTests(){let passed=0;const check=(x:unknown,n:string)=>{if(!x)throw Error('Assembly '+n);passed++;};
+ const before=JSON.stringify(productCatalog),r=scenario(),a=r.technicalReport!.fasteners!;
+ check(a.length===9,'all nine stock screws assessed');check(a.filter(v=>v.status==='candidate').length===3,'TOP60 TOP70 ANTIK60');
+ for(const id of ['55013/0148','55013/0155','55013/0107','55013/0109'])check(a.find(v=>v.article===id)?.status==='incompatible','4mm auxiliary '+id);
+ check(a.find(v=>v.article==='55013/0290')?.status==='incompatible','50 too short');
+ check(a.find(v=>v.article==='55013/0277')?.status==='incompatible','ALU on timber');
+ const selected=scenario(undefined,{technical:{screwArticle:'55013/0569'}});check(selected.materials.some(m=>m.article==='55013/0569'&&m.quantity===2),'exact ANTIK choice');
+ const invalid=scenario(undefined,{technical:{screwArticle:'55013/0148'}});check(!invalid.materials.some(m=>m.key==='fixings'),'invalid exact choice no fallback');
+ check(parseTechnicalOptions({screwArticle:'auto'})?.screwArticle==='auto','auto persists');check(parseTechnicalOptions({screwArticle:'foo'})===null,'invalid rejects');
+ const hidden=scenario('55978/0230',{gapMm:6,technical:{fixing:'profix-x'}});check(hidden.technicalReport!.hiddenCoverage?.complete===false,'hidden never full claim');check(hidden.technicalReport!.hiddenCoverage!.boundaryLocations>0,'boundaries counted');check(hidden.warnings.some(w=>w.code==='hidden-height-review'),'hidden assembly height unknown');
+ const prod=productCatalog.find(p=>p.variants.some(v=>v.articleNumber==='55954/2183'))!,v=prod.variants.find(v=>v.articleNumber==='55954/2183')!;
+ const input={productId:prod.id,variantId:v.id,outline:shapeOutline('rectangle',4000,2500),holes:[],orientation:'x' as const,heightMm:180,gapMm:9,reservePercent:0};
+ const rows=compareAssemblies(input,toEngineProduct(prod,v,productCatalog));check(rows.some(r=>r.material==='aluminium')&&rows.some(r=>r.material==='wood'),'both frames');check(rows.every(r=>r.status==='blocked'||r.status==='requiresReview'),'no approved assemblies');
+ check(compareAssemblies({...input,heightMm:30},toEngineProduct(prod,v,productCatalog)).every(r=>r.status==='blocked'),'low frame no false acceptable');
+ check(JSON.stringify(rows)===JSON.stringify(compareAssemblies(input,toEngineProduct(prod,v,productCatalog))),'deterministic comparison');
+ check(JSON.stringify(productCatalog)===before,'catalog immutable');
+ check(scenario(undefined,{technical:{exposure:'chlorine'}}).pedestals.length===0,'no fabricated support capacity');
+ return {suite:'stock-fasteners-assembly',passed,failed:0};}
