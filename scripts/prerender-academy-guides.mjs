@@ -27,7 +27,7 @@ const staticStep = (topic, step) => publicRoot + slug(topic) + '/' + slug(step) 
 const paragraphs = values => values.map(value => '<p>' + escape(value) + '</p>').join('');
 const css = `
   @media screen {
-    :root{color-scheme:light;font-family:var(--ds-font);color:var(--ds-ink);background:var(--ds-paper);font-synthesis:none}
+    :root{--ds-paper:#fff;--ds-surface:#e5e5e5;--ds-soft:#f4f4f4;--ds-ink:#000;--ds-muted:#555;--ds-line:#ccc;--ds-font:'Open Sans',Helvetica,Arial,sans-serif;--ds-display:var(--ds-font);--ds-h1:clamp(1.5rem,1.05rem + 1.3vw,2.125rem);--ds-h2:1.625rem;--ds-h3:1.25rem;--ds-body:clamp(1rem,.94rem + .2vw,1.1875rem);--ds-small:.875rem;--ds-container:1120px;--ds-gutter:32px;--ds-space-2:8px;--ds-space-3:12px;--ds-space-4:16px;--ds-space-5:24px;--ds-space-6:32px;--ds-space-7:48px;--ds-space-8:64px;--ds-space-9:96px;color-scheme:light;font-family:var(--ds-font);color:var(--ds-ink);background:var(--ds-paper);font-synthesis:none}
     *{box-sizing:border-box}body{margin:0;font:var(--ds-body)/1.5 var(--ds-font)}a{color:inherit;text-underline-offset:.2em}a:focus-visible,summary:focus-visible{outline:2px solid var(--ds-ink);outline-offset:5px}
     .bar{padding:var(--ds-space-5) max(var(--ds-gutter,16px),calc((100vw - var(--ds-container))/2));border-bottom:1px solid var(--ds-line);display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--ds-space-4);font-size:var(--ds-small)}
     .bar a{text-decoration:none;min-height:44px;display:inline-flex;align-items:center}.brand{font-weight:700}.crumbs{display:flex;flex-wrap:wrap;gap:var(--ds-space-4)}
