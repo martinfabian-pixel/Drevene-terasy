@@ -9,7 +9,7 @@ export default function TechnicalDiagram({kind='assembly',staticView=false}:{kin
  const p=lunaExample?.rules;
  const value=(key:'jointGap'|'doubleJoistClearance'|'endFixingOffset'|'sideFixingOffset')=>p?.[key].status==='verified'?p[key].value:null;
  const title=kind==='joint'?'Čelný spoj — pozdĺžny rez':kind==='orientation'?'Orientácia prierezu — modelový príklad':'Vrstvy terasy — principiálny rez';
- return <figure className="academy-diagram" data-testid={'diagram-'+kind}>
+ return <figure className="academy-diagram" data-testid={staticView?undefined:'diagram-'+kind}>
   <figcaption><strong>{title}</strong><span>{kind==='joint'?'Rozmery len pre priradený systém Lunawood; nie statický návrh.':'Principiálna schéma; nie realizačný detail.'}</span></figcaption>
   {!staticView&&<><div className="academy-segment" role="group" aria-label={'Riešenie: '+title}><button aria-pressed={!risk} onClick={()=>setRisk(false)}>Odporúčaný princíp</button><button aria-pressed={risk} onClick={()=>setRisk(true)}>Rizikový detail</button></div>{kind!=='orientation'&&<fieldset className="academy-layers"><legend>Zobrazené vrstvy</legend>{layers.map(label=><label key={label}><input type="checkbox" checked={!hidden.includes(label)} onChange={()=>setHidden(v=>v.includes(label)?v.filter(x=>x!==label):[...v,label])}/>{label}</label>)}</fieldset>}</>}
   {!staticView&&<button className="academy-zoom" aria-pressed={zoom} onClick={()=>setZoom(!zoom)}>{zoom?'Zmenšiť detail':'Zväčšiť detail'}</button>}

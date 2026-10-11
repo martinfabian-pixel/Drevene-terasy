@@ -95,5 +95,5 @@ export const proChecklist = ['Zdokumentované zaťaženie, rozpätia, uloženie 
 export const pending = ['Statika nosníkov a podpier, zaťaženie, podložie a stabilita rámu.','Rozpory odvetrania: Lunawood s. 5 / 19 a JAF 2026 / nedatovaný list.','Úplné štartovacie, koncové a výmenné detaily skrytých systémov.','Gardin: teplotné dilatácie, pevné body a systémové napojenia.','Prahy, bazén, hydroizolácia a neoverené artikle.','Nezávislá odborná revízia, meno a dátum schvaľujúcej osoby.'];
 export const boardRows = productCatalog.filter(p=>['massive','thermo','wpc'].includes(p.category)).flatMap(product=>product.variants.map(variant=>({product,variant,rules:technicalProfile(product,variant)})));
 export const lunaExample = boardRows.find(r=>r.variant.articleNumber==='55987/0230');
-export const relatedProducts = productCatalog.filter(p=>['joists','aluminium','pedestals','fixings'].includes(p.category)).slice(0,8);
+export const relatedProducts = ['joists','aluminium','fixings','pedestals'].flatMap(category=>productCatalog.filter(p=>p.category===category).slice(0,2));
 export {RULE_VERSION};
