@@ -22,7 +22,7 @@ async function measure(page){return page.evaluate(()=>{
  const visible=el=>{const box=el.getBoundingClientRect(),style=getComputedStyle(el);return box.width>0&&box.height>0&&style.display!=='none'&&style.visibility!=='hidden'};
  const describe=(el,kind)=>{const style=getComputedStyle(el),box=el.getBoundingClientRect();return {kind,tag:el.tagName,id:el.id,classes:el.className?.baseVal??String(el.className??''),label:(el.getAttribute('aria-label')||el.textContent||'').trim().replace(/\s+/g,' ').slice(0,100),box:{x:box.x,y:box.y,width:box.width,height:box.height},styles:Object.fromEntries(properties.map(key=>[key,style[key]]))}};
  const entries=[];entries.push(describe(document.body,'body'));
- for(const selector of ['h1','h2','h3','header','nav','nav a','button','main','section','footer'])for(const el of [...document.querySelectorAll(selector)].filter(visible).slice(0,selector==='h2'?8:3))entries.push(describe(el,selector));
+ for(const [kind,selector,limit] of [['h1','h1',3],['h2','h2',8],['h3','h3',3],['header','header,.elementor-location-header,[data-elementor-type="header"],[role="banner"]',4],['nav','nav,.elementor-nav-menu,.elementor-nav-menu__container,.elementor-location-header [role="navigation"]',5],['nav a','nav a,.elementor-nav-menu a,.elementor-location-header a,[data-elementor-type="header"] a',8],['button','button,.elementor-menu-toggle,[role="button"]',5],['main','main',3],['section','section',3],['footer','footer',2]])for(const el of [...document.querySelectorAll(selector)].filter(visible).slice(0,limit))entries.push(describe(el,kind));
  const headingBlocks=[...document.querySelectorAll('h2')].filter(visible).slice(0,8).map(el=>el.closest('article,li,[class*="product"],[class*="produkt"]')||el.parentElement.parentElement);
  for(const el of [...new Set(headingBlocks)])entries.push(describe(el,'product-block'));
  const stylesheets=[...document.styleSheets].map(sheet=>({url:sheet.href??'inline',disabled:sheet.disabled,media:sheet.media.mediaText}));
@@ -33,19 +33,34 @@ async function measure(page){return page.evaluate(()=>{
  return {url:location.href,title:document.title,viewport:{width:innerWidth,height:innerHeight},scrollWidth:document.documentElement.scrollWidth,pageHeight:document.documentElement.scrollHeight,styles:entries,stylesheets,fontFaces,fontStatus,unavailableStylesheets,controls};
 })}
 async function dismissConsent(page){
+ const decline=page.locator('#CybotCookiebotDialogBodyButtonDecline');
+ try{
+  await decline.waitFor({state:'visible',timeout:15_000});await decline.click({timeout:5000});
+  await page.locator('#CybotCookiebotDialog').waitFor({state:'hidden',timeout:7000});
+  return {dismissed:true,control:'#CybotCookiebotDialogBodyButtonDecline',choice:'Necessary cookies only'};
+ }catch(error){
+  if(await decline.isVisible().catch(()=>false))return {dismissed:false,control:'#CybotCookiebotDialogBodyButtonDecline',error:error.message};
+ }
  const labels=[/nur notwendige/i,/alle ablehnen/i,/ablehnen/i,/reject all/i,/essential only/i];
- for(const name of labels){const button=page.getByRole('button',{name}).first();if(await button.isVisible().catch(()=>false)){await button.click({timeout:3000}).catch(()=>{});return name.source}}
- return null;
+ for(const name of labels){const button=page.getByRole('button',{name}).first();if(await button.isVisible().catch(()=>false)){await button.click({timeout:3000}).catch(()=>{});return {dismissed:true,control:name.source}}}
+ return {dismissed:false,reason:'No visible consent dialog identified after waiting.'};
 }
 async function openMenu(page){
- const candidates=page.locator('header button,header a,header [role="button"],[class*="menu-toggle"],[class*="hamburger"],[class*="nav-toggle"],[aria-controls*="menu"],[aria-label*="menu"],[aria-label*="Menu"]');
+ const candidates=page.locator('header button,header a,header [role="button"],.elementor-location-header button,.elementor-location-header [role="button"],.elementor-menu-toggle,[class*="menu-toggle"],[class*="hamburger"],[class*="nav-toggle"],[aria-controls*="menu"],[aria-label*="menu"],[aria-label*="Menu"]');
  const eligible=[];
  for(let index=0;index<await candidates.count();index++){
   const candidate=candidates.nth(index);if(!await candidate.isVisible())continue;
-  const detail=await candidate.evaluate(el=>({label:el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent?.trim()||'',classes:String(el.className),id:el.id,tag:el.tagName,expanded:el.getAttribute('aria-expanded')}));
-  if(/menu|menü|hamburger|nav-toggle|navigation öffnen|navigation toggle/i.test([detail.label,detail.classes,detail.id].join(' '))&&!/cookie|consent|privacy/i.test(detail.classes+' '+detail.label))eligible.push({index,detail});
+  const detail=await candidate.evaluate(el=>({label:el.getAttribute('aria-label')||el.getAttribute('title')||el.textContent?.trim()||'',classes:String(el.className),id:el.id,tag:el.tagName,href:el.getAttribute('href'),expanded:el.getAttribute('aria-expanded')}));
+  const semantic=[detail.label,detail.classes,detail.id].join(' '),strong=/hamburger|menu-toggle|nav-toggle|navbar-toggler|eicon-menu|navigation (?:öffnen|toggle)|menü öffnen|menu öffnen/i.test(semantic);
+  if((strong||(/menu|menü|navigation/i.test(detail.label)&&detail.tag!=='A'))&&!/cookie|consent|privacy/i.test(semantic)&&!(detail.tag==='A'&&detail.href&&!detail.href.startsWith('#')))eligible.push({index,detail,score:strong?2:1});
  }
- for(const {index,detail} of eligible){try{await candidates.nth(index).click({timeout:3000});await page.waitForTimeout(250);return {opened:true,control:detail}}catch{}}
+ eligible.sort((a,b)=>b.score-a.score);
+ for(const {index,detail} of eligible){try{
+  await candidates.nth(index).click({timeout:3000});await page.waitForTimeout(500);
+  const state=await candidates.nth(index).evaluate(el=>({expanded:el.getAttribute('aria-expanded'),classes:String(el.className),dropdowns:[...document.querySelectorAll('.elementor-nav-menu--dropdown,.elementor-nav-menu__container,[role="dialog"]')].filter(node=>{const r=node.getBoundingClientRect(),s=getComputedStyle(node);return r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden'&&s.opacity!=='0'}).map(node=>({classes:String(node.className),text:node.textContent.trim().slice(0,80)}))}));
+  const opened=state.expanded==='true'||/elementor-active|is-active|is-open|menu-open/.test(state.classes)||state.dropdowns.length>0;
+  return {opened,control:detail,state};
+ }catch{}}
  return {opened:false,reason:'No visible menu toggle identified. Desktop may use permanently visible navigation.',eligible:eligible.map(x=>x.detail)};
 }
 try{
@@ -56,11 +71,14 @@ try{
   page.on('response',response=>{const type=response.request().resourceType();if(['stylesheet','font'].includes(type))resources.set(response.url(),{url:response.url(),type,status:response.status(),contentType:response.headers()['content-type'],contentLength:response.headers()['content-length']})});
   page.on('pageerror',error=>report.warnings.push({width,kind:'reference-page-error',message:error.message}));
   await page.goto(reference,{waitUntil:'domcontentloaded',timeout:60_000});await page.locator('h1').first().waitFor();await page.evaluate(()=>document.fonts.ready);
-  const consent=dismissConsent(page);await consent;
+  let consent=await dismissConsent(page);
   await page.evaluate(async()=>{for(const image of document.images)image.loading='eager';for(let y=0;y<Math.min(document.documentElement.scrollHeight,15000);y+=700){scrollTo(0,y);await new Promise(r=>setTimeout(r,55))}scrollTo(0,0)});
-  await page.waitForTimeout(400);const closed=await measure(page);await capture(page,width,'closed');
+  await page.waitForTimeout(400);
+  if(await page.locator('#CybotCookiebotDialog').isVisible().catch(()=>false))consent={...consent,retry:await dismissConsent(page)};
+  if(await page.locator('#CybotCookiebotDialog').isVisible().catch(()=>false)){await capture(page,width,'consent-blocked');throw Error('Reference audit cannot measure the clean design while the Cookiebot overlay remains visible at '+width+'px')}
+  const closed=await measure(page);await capture(page,width,'closed');
   const menu=await openMenu(page);const opened=await measure(page);await capture(page,width,'menu');
-  const record={width,height,consent:await consent,menu,closed,opened};report.viewports.push(record);await writeFile(resolve(output,width+'-metrics.json'),JSON.stringify(record,null,2));
+  const record={width,height,consent,menu,closed,opened};report.viewports.push(record);await writeFile(resolve(output,width+'-metrics.json'),JSON.stringify(record,null,2));
   console.log('FIXING_REFERENCE_METRICS_'+width+' '+JSON.stringify({menu,styles:closed.styles.filter(row=>['body','h1','h2','nav','button','product-block'].includes(row.kind)).filter((_,i)=>i<18),fontFaces:closed.fontFaces,fontStatus:closed.fontStatus}));
   await context.close();
  }
