@@ -14,7 +14,7 @@ export interface TechnicalProfile {
  spacing: Rule<number>; sideGap: Rule<number>; jointGap: Rule<number>; wallGap: Rule<number>;
  endFixingOffset: Rule<number>; sideFixingOffset: Rule<number>; maxOverhang: Rule<number>;
  doubleJoistClearance: Rule<number>; minVentilationConcrete: Rule<number>; minVentilationSoil: Rule<number>;
- predilling: Rule<string>; screwDepth: Rule<string>; movement: Rule<string>;
+ predrilling: Rule<string>; screwDepth: Rule<string>; movement: Rule<string>;
  systems: Rule<FixingSystem[]>; joistArticles: Rule<string[]>; minSupports: Rule<number>;
  structuralSpan: Rule<number>; verification: Verification; notes: string[];
 }

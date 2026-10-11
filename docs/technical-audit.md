@@ -17,6 +17,12 @@ Pridávame samostatný verzovaný register SKU/profilov, deterministický predbe
 
 ## Podklady
 
-Archív bol otvorený lokálne, obsahuje 11 PDF / 117 fyzických strán. Všetky strany boli vyrenderované; textové vrstvy a montážne schémy sú predmetom kontroly. Katalóg JAF obsahuje dvojstrany: v citáciách uvádzame fyzické číslo PDF. Cudzie PDF ani ich obrázky sa nenahrávajú do verejného webu.
+Archív bol otvorený lokálne, obsahuje 11 PDF / 117 fyzických strán. Všetky strany boli vyrenderované; textové vrstvy a montážne schémy boli prečítané a skontrolované. Katalóg JAF obsahuje dvojstrany: v citáciách uvádzame fyzické číslo PDF. Cudzie PDF ani ich obrázky sa nenahrávajú do verejného webu.
 
-Pravidlá, konflikty a obmedzenia sú v planner-rules.md. Výsledky skutočne spustených testov sa doplnia po implementácii.
+Pravidlá, konflikty a obmedzenia sú v planner-rules.md. Výsledky spustených testov sú uvedené nižšie.
+
+## Overenie
+
+GitHub Actions [38124651505](https://github.com/martinfabian-pixel/Drevene-terasy/actions/runs/38124651505), commit 6900bfb5b3c092aab20b52aaa31c8df3a1be5a4d: produkčný TypeScript/Vite build a deployment úspešné. Audit cenníka 1 107 kontrol; engine 50, skladový adaptér 62, manifest 22, technický výpočet 495, commerce 50, backend 47 — všetky bez zlyhania. Prehliadačové kontroly: responzívna homepage úspešná, platforma 91 kontrol, rozšírená sada 16 scenárov vrátane WebKitu, dotyku, tlače/PDF, košíka a technických pravidiel. Fyzický iPhone nebol dostupný; WebKit je automatizovaná kontrola prehliadača.
+
+Po doplnení tlače roštu, automatického rozbalenia zdrojov pre tlač a presných názvov materiálov lokálne znovu prešlo 50 + 62 + 22 + 495 kontrol. Finálny commit spúšťa rovnakú kompletnú CI sadu.
