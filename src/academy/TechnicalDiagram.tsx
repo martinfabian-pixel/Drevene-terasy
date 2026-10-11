@@ -37,7 +37,7 @@ export default function TechnicalDiagram({kind='assembly',staticView=false}:{kin
     <text x="395" y="77">{risk?'VODA OSTÁVA V KONTAKTE':'VOĽNÁ CESTA VODY'}</text>
     {kind==='joint'&&!risk&&<g fill="#101010"><path d="M290 269h140m-140-8v16m140-16v16M240 97h111m-111-6v12m111-12v12" stroke="#101010"/><text x="296" y="292">min. {value('doubleJoistClearance')??'?'} mm</text><text x="250" y="89">min. {value('endFixingOffset')??'?'} mm</text><text x="55" y="35">Čelná škára: {value('jointGap')??'?'} mm · bočný odstup skrutky: min. {value('sideFixingOffset')??'?'} mm</text></g>}
    </>}
-  </svg></div>
+  </svg></div>{!staticView&&<p className="au-drawing-hint">Posuňte výkres ↔ alebo otvorte zväčšený detail.</p>}
   <p className={risk?'academy-warning':'academy-caption'} aria-live="polite">{risk?(kind==='orientation'?'Široký mokrý kontakt bez oddelenia je rizikový. Poloha naležato môže byť prípustná po overení konkrétnej skladby.':'Riziko: spoločná mokrá plocha a skrutky blízko čela. Červené/rizikové zobrazenie je princíp chyby, nie univerzálny zákaz každého overeného systému.'):(kind==='joint'?'Lunawood 2023, s. 23 a 28. Čistá medzera medzi nosníkmi; odstup skrutky od čela. Schéma nie je v mierke a nepreukazuje únosnosť.':kind==='orientation'?'JAF 2026, PDF s. 27. Modelový prierez 40 × 70 mm; skutočný profil a orientáciu lepených prvkov treba overiť.':'Oddelenie styčných plôch a odtok vody. Počet, rozmery a únosnosť podpier určuje projekt. JAF 2026, PDF s. 27; Lunawood 2023, s. 19.')}</p>
  </figure>;
 }

@@ -1,0 +1,1 @@
+export default function SourceText({text}:{text:string}){return <>{text.split(/(https?:\/\/[^\s]+)/g).map((part,i)=>/^https?:\/\//.test(part)?<a key={i} href={part} target="_blank" rel="noreferrer" className="au-source-link">Otvoriť pôvodný zdroj ↗</a>:<span key={i}>{part}</span>)}</>}
