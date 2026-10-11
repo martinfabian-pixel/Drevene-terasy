@@ -13,3 +13,34 @@
 @media print{.academy-cover-detail{display:block;margin-top:9mm}.academy-cover-detail .academy-diagram{margin:0}.academy h1{margin:8mm 0;line-height:1}.academy h1>span,.academy h1 em{line-height:1.1}.academy-hero{padding:0}.academy-subtitle{margin:5mm 0;font-size:14pt}.academy-meta{gap:5px;font-size:8pt;margin-bottom:4mm}.academy-warning{margin:4mm 0;padding:3mm}.academy-chapter{padding:0;border:0}.academy-chapter h2{font-size:20pt;margin:0 0 4mm;break-after:avoid}.academy-body p{margin:0 0 3mm;font-size:10pt}.academy-body .academy-lead{font-size:13pt;margin-bottom:4mm}.academy-diagram{margin:4mm 0;padding:3mm}.academy-diagram svg{max-height:62mm}.academy-diagram figcaption{gap:4px;margin-bottom:3mm}.academy-diagram figcaption span,.academy-caption,.academy-diagram p{font-size:8pt}.academy-professional{padding:3mm;margin:3mm 0;break-inside:auto}.academy-professional h3{margin:0 0 2mm;break-after:avoid}.academy-evidence{margin:3mm 0;break-inside:avoid}.academy-evidence p{font-size:8pt}.academy-facts{break-before:page;padding:4mm}.academy-facts h3{margin-top:0}.academy-facts p{font-size:9pt}.academy-facts dl>div{padding:3mm 0}.academy-button{display:none!important}.academy-products{display:grid;grid-template-columns:1fr 1fr;gap:4mm 7mm}.academy-products a{padding:3mm 0;font-size:9pt}.academy-products small{font-size:8pt}.academy-checklist{padding:5mm;margin:0;border:0}.academy-checklist>label{padding:2mm 0;font-size:10pt}.academy-checklist h2{font-size:22pt}.academy-protocol{break-before:page;padding-top:8mm}.academy-protocol textarea{min-height:80mm}.academy-protocol h3{font-size:17pt}.academy-toc small{display:none}}
 
 @media print{.academy-diagram svg text{font-size:19px}#chapter-a>p:not(.academy-lead){font-size:9.5pt;line-height:1.4;margin-bottom:2mm}#chapter-a .academy-diagram{margin:3mm 0}#chapter-a .academy-professional p{font-size:9.5pt;line-height:1.4;margin-bottom:2mm}.academy-source{padding:2mm 0}.academy-source p{font-size:9pt;margin-bottom:1.5mm}.academy-source h3{margin:2mm 0;font-size:12pt}#manual-sources>p{font-size:9pt}}
+.academy-new-manual .academy-hero h1,.academy-article .academy-hero h1{font-size:clamp(52px,8vw,130px);line-height:1.06;max-width:1100px;overflow-wrap:anywhere;text-transform:uppercase}
+.academy-editorial,.academy-author{padding:clamp(24px,5vw,80px);border-top:1px solid #bbb}
+.academy-editorial>h2,.academy-author>h2{font-family:'DT Anton',Impact,sans-serif;font-size:clamp(40px,6vw,90px);line-height:1.12;margin:0 0 32px}
+.academy-editorial>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 40px}
+.academy-editorial>div>a{display:grid;grid-template-columns:36px 1fr;gap:10px 18px;border-top:1px solid #777;padding:24px 0;color:inherit;text-decoration:none}
+.academy-editorial h3{font-size:clamp(22px,2.2vw,32px);margin:0;line-height:1.2}
+.academy-editorial p,.academy-editorial b{grid-column:2;margin:0}
+.academy-editorial>div>a:hover h3{background:#c8ff32}
+.academy-author{background:#242424;color:#f7f7f4}
+.academy-author p,.academy-author small{max-width:850px;display:block;line-height:1.7}
+.academy-article-body{max-width:1050px;margin:auto;padding:40px 24px}
+.academy-article-body>section{margin-bottom:64px}
+.academy-article-body p{font-size:18px;line-height:1.8}
+.academy-products article{border:1px solid #bbb;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.academy-products article>a{border:0;padding:0;display:block}
+.academy-products article label{display:grid;gap:8px;font-size:13px}
+.academy-products select{width:100%;min-width:0;padding:10px;border:1px solid #777;background:#fff;font:inherit}
+.academy-detail{margin:30px 0;background:#efefeb;border:1px solid #bbb;padding:16px;break-inside:avoid}
+.academy-detail figcaption{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:13px;margin-bottom:18px}
+.academy-detail figcaption strong{font-size:20px}
+.academy-detail-canvas{overflow:auto;max-width:100%;touch-action:pan-x pan-y}
+.academy-detail-canvas svg{display:block;width:100%;height:auto;min-width:0}
+.academy-detail-canvas.is-zoomed svg{min-width:800px}
+.academy-detail svg text{font-family:Arial,sans-serif;font-size:16px;fill:#161616}
+.academy-layer-controls{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0;font-size:13px}
+.academy-layer-controls label{display:flex;align-items:center;gap:6px;min-height:44px}
+.academy-layer-controls input{width:20px;height:20px}
+.academy-steps{padding-left:28px}
+.academy-steps li{padding:0 0 18px 8px;font-size:18px;line-height:1.6}
+@media(max-width:600px){.academy-editorial>div{grid-template-columns:1fr}.academy-detail{padding:10px;margin:24px 0}.academy-detail .academy-segment{flex-wrap:wrap}.academy-new-manual .academy-hero h1,.academy-article .academy-hero h1{font-size:clamp(40px,10vw,64px)}.academy-detail figcaption{display:block}.academy-detail figcaption span{display:block;margin-top:8px}}
+@media print{.academy-new-manual .academy-hero h1{font-size:48pt;line-height:1.1;max-width:170mm}.academy-new-manual .academy-hero{min-height:230mm;break-after:page}.academy-new-manual .academy-toc{break-after:page}.academy-new-manual .academy-chapter{break-before:page}.academy-new-manual .academy-chapter p{font-size:10pt;line-height:1.45;margin:3mm 0}.academy-new-manual .academy-chapter h2{font-size:24pt;line-height:1.15}.academy-new-manual .academy-detail{padding:3mm;margin:4mm 0;break-inside:avoid}.academy-new-manual .academy-detail-canvas svg{max-height:66mm;width:100%}.academy-new-manual .academy-detail svg text{font-size:18px}.academy-new-manual .academy-segment,.academy-new-manual .academy-layer-controls{display:none}.academy-new-manual .academy-cover-detail .academy-detail{border:0}.academy-new-manual .academy-cover-detail svg{max-height:90mm}.academy-new-manual .academy-products article{padding:3mm;gap:2mm;break-inside:avoid}.academy-new-manual .academy-products select{display:none}.academy-new-manual .academy-products article label{display:none}.academy-new-manual .academy-products small{font-size:9pt}.academy-new-protocol{break-before:page}.academy-new-protocol textarea{height:70mm}.academy-new-manual .academy-steps li{font-size:11pt}.academy-new-manual .academy-evidence p{font-size:8pt;line-height:1.3}.academy-new-manual .academy-detail .academy-evidence{font-size:8pt}.academy-new-manual .academy-professional{padding:3mm}.academy-new-manual .academy-products{grid-template-columns:1fr 1fr}}
