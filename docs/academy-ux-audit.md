@@ -10,7 +10,7 @@
 
 ## Implementované zmeny
 
-- Jedna knižnica a dve úrovne čítania; tri kategórie, vyhľadávanie s normalizáciou diakritiky, indexované URL.
+- Jedna knižnica a dve úrovne čítania; tri kategórie, vyhľadávanie v celom existujúcom texte s normalizáciou diakritiky a odkazom na zodpovedajúcu kapitolu, indexované URL.
 - Obrazovkový čítač všetkých šiestich manuálov z pôvodných dát: kapitoly, montážny postup, protokol, výrobky, zdroje. URL `chapter` a `level` zachovajú výber a históriu.
 - Navigácia kapitol na desktope; kompaktný výber a predchádzajúci/ďalší krok na mobile. Bez hromadného vykresľovania všetkých kapitol.
 - Odborné detaily a zdroje sú rozbaliteľné. Podstatné obmedzenia a rozpory z odborných odsekov zostávajú viditeľné aj v základnom režime.
