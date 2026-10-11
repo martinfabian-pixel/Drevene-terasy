@@ -1,8 +1,8 @@
-# POD POVRCHOM — manuál 04
+# POD POVRCHOM — akadémia
 
 ## Architektúra
 
-- `/pod-povrchom`: register šiestich manuálov. Publikovaný je iba 04; ostatné majú názov, rozsah a jasný stav prípravy.
+- `/pod-povrchom`: register šiestich manuálov. Publikovaných je všetkých šesť manuálov. Rozšírenie etapy 2 a otvorené rozhodnutia dokumentuje academy-stage2.md.
 - `/pod-povrchom/04-podkonstrukcie`: sedem kapitol, základná/profesionálna úroveň, tri vlastné SVG detaily, prepínanie rizika, vrstvy, zväčšenie, kontrolný protokol a zdroje.
 - `src/academy/manual.ts`: redakčný obsah, zdroje a metadata. Produktové hodnoty sa neduplikujú: boardRows aj lunaExample používajú technicalProfile z existujúceho registra.
 - Žiadne zmeny obchodného katalógu, cien, skladu, košíka ani výpočtových pravidiel. Odkaz do plánovača obsahuje presné product a variant.
@@ -10,7 +10,7 @@
 
 ## PDF
 
-`scripts/qa-academy-ci.mjs` otvorí skutočný produkčný manuál s `?print=1`, profesionálnou úrovňou a všetkými artiklami. Chromium z rovnakého DOM vytvorí A4 dokument `dist/manuals/pod-povrchom-04.pdf` s číslovanými stranami, vektorovými SVG a textom. Nie je tu druhá ručne udržiavaná databáza PDF obsahu. Súbor sa vytvára pred uploadom Pages. Neúspešné testy blokujú nasadenie. Tlač aktuálneho protokolu je samostatná funkcia prehliadača.
+`scripts/qa-academy-ci.mjs` otvorí všetkých šesť skutočných produkčných manuálov s `?print=1`, profesionálnou úrovňou a všetkými artiklami. Chromium z rovnakého DOM vytvorí šesť A4 dokumentov `dist/manuals/pod-povrchom-NN.pdf` (01–06) s číslovanými stranami, vektorovými SVG a textom. Nie je tu druhá ručne udržiavaná databáza PDF obsahu. Súbor sa vytvára pred uploadom Pages. Neúspešné testy blokujú nasadenie. Tlač aktuálneho protokolu je samostatná funkcia prehliadača.
 
 ## Technická dôveryhodnosť
 

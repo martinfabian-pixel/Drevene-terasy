@@ -30,7 +30,9 @@ jobs:
         run: npm run test:commerce && npm run test:server
       - name: Install Chromium and WebKit for browser verification
         run: npx playwright install --with-deps chromium webkit
-      - name: Generate A4 academy manual and verify responsive academy
+      - name: Verify academy content and shared technical rules
+        run: node scripts/test-academy.mjs
+      - name: Generate six A4 academy manuals and verify responsive academy
         run: node scripts/qa-academy-ci.mjs
         env:
           ACADEMY_REVIEW_EXPORT: '1'
