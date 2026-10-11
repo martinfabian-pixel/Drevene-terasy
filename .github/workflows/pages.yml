@@ -32,6 +32,8 @@ jobs:
         run: npx playwright install --with-deps chromium webkit
       - name: Generate A4 academy manual and verify responsive academy
         run: node scripts/qa-academy-ci.mjs
+        env:
+          ACADEMY_REVIEW_EXPORT: '1'
       - name: Verify responsive homepage and interactions
         run: npm run test:homepage
       - name: Verify catalog, planner, cart and responsive platform
