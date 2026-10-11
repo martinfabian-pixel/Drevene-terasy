@@ -198,6 +198,18 @@ try{
   await page.locator('.ag-contents>summary').click();
   await page.getByRole('link',{name:/Cumaru alebo Ipé\?/}).click();await waitGuide(page,'drevo','cumaru-ipe');
   const comparison=await page.getByTestId('guide-step').innerText();assert.match(comparison,/Cumaru/i);assert.match(comparison,/Ipé|Ipe/i);
+  const comparisonLayout=await page.getByTestId('guide-comparison').evaluate(el=>{
+   const visual=el.closest('[data-testid="guide-visual"]').getBoundingClientRect();
+   const buttons=[...el.querySelectorAll('.academy-segment button')];
+   const cumaru=buttons.find(button=>button.textContent.trim()==='Cumaru');
+   const node=[...cumaru.childNodes].find(child=>child.nodeType===Node.TEXT_NODE&&child.textContent.includes('Cumaru'));
+   const start=node.textContent.indexOf('Cumaru'),range=document.createRange();
+   range.setStart(node,start);range.setEnd(node,start+'Cumaru'.length);
+   return {cumaruLines:[...range.getClientRects()].filter(rect=>rect.width>0&&rect.height>0).length,
+    buttons:buttons.map(button=>{const rect=button.getBoundingClientRect();return {text:button.textContent.trim(),inside:rect.left>=visual.left-1&&rect.right<=visual.right+1,width:rect.width}})};
+  });
+  assert.equal(comparisonLayout.cumaruLines,1,'Cumaru remains on one text line at '+width+' px');
+  assert.equal(comparisonLayout.buttons.length,2);for(const button of comparisonLayout.buttons)assert.ok(button.inside,'Material choice stays inside visual: '+name+' '+button.text);
   await shot(page,name,'comparison');await noOverflow(page,name+' comparison');
   await testMainInteraction(page);
   await technicalDisclosure(page,'Cumaru / Ipé');
