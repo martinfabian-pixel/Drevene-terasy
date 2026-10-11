@@ -647,6 +647,7 @@ try {
     await page.getByRole('button',{name:'04 Konštrukcia',exact:true}).click();
     await page.getByTestId('technical-screw').selectOption('55013/0569');
     await page.getByTestId('assembly-comparison').locator('summary').first().click();
+    await page.getByTestId('assembly-comparison').locator('table').waitFor();
     assert.match(await page.getByTestId('assembly-comparison').innerText(),/Čiastkový súčet/);
     assert.match(await page.getByTestId('assembly-comparison').innerText(),/55016\/0008/);
     await page.getByTestId('planner-add-cart').click();
