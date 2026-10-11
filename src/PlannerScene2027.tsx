@@ -328,7 +328,7 @@ function buildPlannerScene(three: ThreeModule, orbit: OrbitModule, merge: MergeM
       const length = Math.hypot(end.x - start.x, end.z - start.z);
       const geometry = new three.BoxGeometry(length, segment.heightMm / 1000, segment.widthMm / 1000);
       const mesh = new three.Mesh(geometry, joistMaterial);
-      mesh.position.set((start.x + end.x) / 2, (result.heightMm - result.boardThicknessMm - segment.heightMm / 2) / 1000, (start.z + end.z) / 2);
+      mesh.position.set((start.x + end.x) / 2, (result.heightMm - result.boardThicknessMm - (result.technicalReport?.options.fixing === 'visible' ? result.technicalReport.options.spacerMm : 0) - segment.heightMm / 2) / 1000, (start.z + end.z) / 2);
       mesh.rotation.y = -Math.atan2(end.z - start.z, end.x - start.x);
       mesh.castShadow = mesh.receiveShadow = true;
       mesh.userData.joistId = segment.id;
@@ -448,7 +448,7 @@ export default function PlannerScene2027({ result, materialColor = '#a7784e', bo
   const [ready, setReady] = useState(false);
   const [failed, setFailed] = useState(false);
   const [retry, setRetry] = useState(0);
-  const signature = useMemo(() => `${result.outline.map(p => `${p.x}:${p.y}`).join('|')}/${result.holes.map(h => h.map(p => `${p.x}:${p.y}`).join('|')).join(';')}/${result.orientation}/${result.boards.length}/${result.heightMm}/${result.boardThicknessMm}`, [result]);
+  const signature = useMemo(() => `${result.outline.map(p => `${p.x}:${p.y}`).join('|')}/${result.holes.map(h => h.map(p => `${p.x}:${p.y}`).join('|')).join(';')}/${result.orientation}/${result.boards.length}/${result.heightMm}/${result.boardThicknessMm}/${result.joists.length}/${result.technicalReport?.joistArticle??''}/${result.technicalReport?.options.jointGapMm??0}`, [result]);
 
   useEffect(() => {
     const container = host.current;

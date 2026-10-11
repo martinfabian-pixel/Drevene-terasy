@@ -1,3 +1,5 @@
+import { technicalContext } from './technical/rules';
+import { parseTechnicalOptions } from './technical/options';
 import type { Product, ProductVariant } from '../commerce/catalog';
 import type { EngineProduct, ManufacturingRules, PlanInput, Point } from '../engine/types';
 
@@ -31,6 +33,7 @@ export function toEngineProduct(product: Product, variant: ProductVariant, catal
     // Different colours or profiles may not be mixed to make a cheaper cut plan.
     availableLengthsMm: [...new Set(product.variants.filter(item => item.widthMm === variant.widthMm && item.thicknessMm === variant.thicknessMm && item.profile === variant.profile && item.color === variant.color).map(item => item.lengthMm).filter((length): length is number => length !== null && length > 0))].sort((a, b) => a - b),
     status: product.status,
+    technical: product.stockSource ? technicalContext(product, variant, catalog) : undefined,
     installationRules: product.status === 'verified' ? completeStockRules(product, catalog) : null,
   };
 }
@@ -45,5 +48,7 @@ export function parseStockProject(value: unknown, catalog: readonly Product[]): 
   if (input.substrate !== undefined && !['concrete', 'paving', 'soil'].includes(input.substrate)) return null;
   if (![input.heightMm, input.gapMm, input.reservePercent].every(number => typeof number === 'number' && Number.isFinite(number)) || input.heightMm! < 0 || input.heightMm! > 3000 || input.gapMm! < 0 || input.gapMm! > 30 || input.reservePercent! < 0 || input.reservePercent! > 30) return null;
   if (typeof input.variantId !== 'string' || !product.variants.some(variant => variant.id === input.variantId)) return null;
-  return { outline: input.outline, holes: input.holes, orientation: input.orientation!, substrate: input.substrate ?? 'concrete', heightMm: input.heightMm!, gapMm: input.gapMm!, productId: product.id, variantId: input.variantId, reservePercent: input.reservePercent! };
+  const technical = parseTechnicalOptions(input.technical);
+  if (technical === null) return null;
+  return { technical, outline: input.outline, holes: input.holes, orientation: input.orientation!, substrate: input.substrate ?? 'concrete', heightMm: input.heightMm!, gapMm: input.gapMm!, productId: product.id, variantId: input.variantId, reservePercent: input.reservePercent! };
 }

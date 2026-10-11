@@ -1,0 +1,79 @@
+[
+  {
+    "id": "doc-01",
+    "document": "ADLER-aplikacie-povrchovej-upravy-SK.pdf",
+    "pages": 1,
+    "sha256": "163c2ae4ce8cf3eeea44366f61d2cbd20ffa539dd9ad133aca4907834601e717",
+    "review": "Textová vrstva a vyrenderované montážne schémy; zdroj uložený len v súkromných pracovných podkladoch."
+  },
+  {
+    "id": "doc-02",
+    "document": "Terasy_2_2026_SK.pdf",
+    "pages": 31,
+    "sha256": "74bbe3860c4f4af4b8e24de0ea3f16511c0a2a768cc74b5edc49561608613628",
+    "review": "Textová vrstva a vyrenderované montážne schémy; zdroj uložený len v súkromných pracovných podkladoch."
+  },
+  {
+    "id": "doc-03",
+    "document": "upm-profi-piazza-technical-en.pdf",
+    "pages": 2,
+    "sha256": "b25856470c4926be8fadcea51aa3547f3e486e77181b1bb795970d16e04a93e5",
+    "review": "Textová vrstva a vyrenderované montážne schémy; zdroj uložený len v súkromných pracovných podkladoch."
+  },
+  {
+    "id": "doc-04",
+    "document": "montaz_demontaz_7_2020_SK.pdf",
+    "pages": 2,
+    "sha256": "9b2be1b4b7c7737e94fa875996785430c9a771ae0506b5839a4f2d38d966ab7f",
+    "review": "Textová vrstva a vyrenderované montážne schémy; zdroj uložený len v súkromných pracovných podkladoch."
+  },
+  {
+    "id": "doc-05",
+    "document": "LUNAWOOD-osetrovani-a-udrzba-termodreva-CZ.pdf",
+    "pages": 3,
+    "sha256": "a6074eb188ed087869f1190630eafec0c3fe4895cfdd69406b9bd34c7baba79a",
+    "review": "Textová vrstva a vyrenderované montážne schémy; zdroj uložený len v súkromných pracovných podkladoch."
+  },
+  {
+    "id": "doc-06",
+    "document": "upm-profi-decking-installation-images-en.pdf",
+    "pages": 12,
+    "sha256": "7e8a8cc4a4b6f4b3d57f1e2df0a094b21d6cd7fe6c3aca6730d59e126b674450",
+    "review": "Textová vrstva a vyrenderované montážne schémy; zdroj uložený len v súkromných pracovných podkladoch."
+  },
+  {
+    "id": "doc-07",
+    "document": "montaze teras SK 2021.pdf",
+    "pages": 7,
+    "sha256": "009a89ac82e647ea2e726813d086aff8cd8420dd99e6b23b223db62783603ab5",
+    "review": "Textová vrstva a vyrenderované montážne schémy; zdroj uložený len v súkromných pracovných podkladoch."
+  },
+  {
+    "id": "doc-08",
+    "document": "doporuceni pro pokladku SK.pdf",
+    "pages": 1,
+    "sha256": "7084e889ab660df3b5ceaa5434ac402c701c99311b78fb6ecbf7fa6899b77897",
+    "review": "Textová vrstva a vyrenderované montážne schémy; zdroj uložený len v súkromných pracovných podkladoch."
+  },
+  {
+    "id": "doc-09",
+    "document": "upm-profi-decking-installation-instructions-en.pdf",
+    "pages": 6,
+    "sha256": "a5cd8f74d2b2953a5a9278436a5abb892efcc7947e1dacd36276b96e93c81fb8",
+    "review": "Textová vrstva a vyrenderované montážne schémy; zdroj uložený len v súkromných pracovných podkladoch."
+  },
+  {
+    "id": "doc-10",
+    "document": "Lunawood_Thermowood_Guideline for Professionals_CZE.pdf",
+    "pages": 4,
+    "sha256": "c024b49d09e99657d11177d5f03a800af5146f4353c4331dac153997b91a3cb0",
+    "review": "Textová vrstva a vyrenderované montážne schémy; zdroj uložený len v súkromných pracovných podkladoch."
+  },
+  {
+    "id": "doc-11",
+    "document": "LUNAWOOD-navod-k-montazi-drevenych-teras-2023-CZ.pdf",
+    "pages": 48,
+    "sha256": "270bea6962858162ebe81d9b5535708a6745172544ad906a166b6ed4ae9f2126",
+    "review": "Textová vrstva a vyrenderované montážne schémy; zdroj uložený len v súkromných pracovných podkladoch."
+  }
+]

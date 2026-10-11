@@ -1,0 +1,359 @@
+{
+  "55990/2640": {
+    "productId": "jaf-cd906ffb",
+    "widthMm": 145,
+    "thicknessMm": 28,
+    "lengthMm": 4000,
+    "profile": "Profil v cenníku nešpecifikovaný"
+  },
+  "55954/2183": {
+    "productId": "jaf-004195e9",
+    "widthMm": 145,
+    "thicknessMm": 21,
+    "lengthMm": 1830,
+    "profile": "hladký / hladký"
+  },
+  "55954/2214": {
+    "productId": "jaf-004195e9",
+    "widthMm": 145,
+    "thicknessMm": 21,
+    "lengthMm": 2140,
+    "profile": "hladký / hladký"
+  },
+  "55954/2244": {
+    "productId": "jaf-004195e9",
+    "widthMm": 145,
+    "thicknessMm": 21,
+    "lengthMm": 2440,
+    "profile": "hladký / hladký"
+  },
+  "55954/2275": {
+    "productId": "jaf-004195e9",
+    "widthMm": 145,
+    "thicknessMm": 21,
+    "lengthMm": 2750,
+    "profile": "hladký / hladký"
+  },
+  "55954/2305": {
+    "productId": "jaf-004195e9",
+    "widthMm": 145,
+    "thicknessMm": 21,
+    "lengthMm": 3050,
+    "profile": "hladký / hladký"
+  },
+  "55954/2336": {
+    "productId": "jaf-004195e9",
+    "widthMm": 145,
+    "thicknessMm": 21,
+    "lengthMm": 3360,
+    "profile": "hladký / hladký"
+  },
+  "55954/2366": {
+    "productId": "jaf-004195e9",
+    "widthMm": 145,
+    "thicknessMm": 21,
+    "lengthMm": 3660,
+    "profile": "hladký / hladký"
+  },
+  "55954/2397": {
+    "productId": "jaf-004195e9",
+    "widthMm": 145,
+    "thicknessMm": 21,
+    "lengthMm": 3970,
+    "profile": "hladký / hladký"
+  },
+  "55954/2427": {
+    "productId": "jaf-004195e9",
+    "widthMm": 145,
+    "thicknessMm": 21,
+    "lengthMm": 4270,
+    "profile": "hladký / hladký"
+  },
+  "55903/1330": {
+    "productId": "jaf-ca6ff63a",
+    "widthMm": 145,
+    "thicknessMm": 25,
+    "lengthMm": 3000,
+    "profile": "Profil v cenníku nešpecifikovaný"
+  },
+  "55949/6183": {
+    "productId": "jaf-276efe15",
+    "widthMm": 145,
+    "thicknessMm": 21,
+    "lengthMm": 1830,
+    "profile": "hladký/hladký"
+  },
+  "55949/6214": {
+    "productId": "jaf-276efe15",
+    "widthMm": 145,
+    "thicknessMm": 21,
+    "lengthMm": 2140,
+    "profile": "hladký/hladký"
+  },
+  "55949/6244": {
+    "productId": "jaf-276efe15",
+    "widthMm": 145,
+    "thicknessMm": 21,
+    "lengthMm": 2440,
+    "profile": "hladký/hladký"
+  },
+  "55949/6275": {
+    "productId": "jaf-276efe15",
+    "widthMm": 145,
+    "thicknessMm": 21,
+    "lengthMm": 2750,
+    "profile": "hladký/hladký"
+  },
+  "55949/6305": {
+    "productId": "jaf-276efe15",
+    "widthMm": 145,
+    "thicknessMm": 21,
+    "lengthMm": 3050,
+    "profile": "hladký/hladký"
+  },
+  "55949/6336": {
+    "productId": "jaf-276efe15",
+    "widthMm": 145,
+    "thicknessMm": 21,
+    "lengthMm": 3360,
+    "profile": "hladký/hladký"
+  },
+  "55949/6366": {
+    "productId": "jaf-276efe15",
+    "widthMm": 145,
+    "thicknessMm": 21,
+    "lengthMm": 3660,
+    "profile": "hladký/hladký"
+  },
+  "55949/6397": {
+    "productId": "jaf-276efe15",
+    "widthMm": 145,
+    "thicknessMm": 21,
+    "lengthMm": 3970,
+    "profile": "hladký/hladký"
+  },
+  "55949/6458": {
+    "productId": "jaf-276efe15",
+    "widthMm": 145,
+    "thicknessMm": 21,
+    "lengthMm": 4580,
+    "profile": "hladký/hladký"
+  },
+  "55973/7275": {
+    "productId": "jaf-8b3180fa",
+    "widthMm": 140,
+    "thicknessMm": 21,
+    "lengthMm": 2750,
+    "profile": "hladký/hladký"
+  },
+  "55991/1942": {
+    "productId": "jaf-51258b34",
+    "widthMm": 140,
+    "thicknessMm": 26,
+    "lengthMm": 4270,
+    "profile": "hladký/hladký"
+  },
+  "55991/1948": {
+    "productId": "jaf-51258b34",
+    "widthMm": 140,
+    "thicknessMm": 26,
+    "lengthMm": 4880,
+    "profile": "hladký/hladký"
+  },
+  "55921/0305": {
+    "productId": "jaf-d0c00a09",
+    "widthMm": 145,
+    "thicknessMm": 25,
+    "lengthMm": 3050,
+    "profile": "Profil v cenníku nešpecifikovaný"
+  },
+  "55921/0336": {
+    "productId": "jaf-d0c00a09",
+    "widthMm": 145,
+    "thicknessMm": 25,
+    "lengthMm": 3360,
+    "profile": "Profil v cenníku nešpecifikovaný"
+  },
+  "55978/0230": {
+    "productId": "jaf-f6deed0e",
+    "widthMm": 117,
+    "thicknessMm": 26,
+    "lengthMm": 3000,
+    "profile": "jemne drážkovaný / hladký, kvalita A"
+  },
+  "55978/0242": {
+    "productId": "jaf-f6deed0e",
+    "widthMm": 117,
+    "thicknessMm": 26,
+    "lengthMm": 4200,
+    "profile": "jemne drážkovaný / hladký, kvalita A"
+  },
+  "55978/0251": {
+    "productId": "jaf-f6deed0e",
+    "widthMm": 117,
+    "thicknessMm": 26,
+    "lengthMm": 5100,
+    "profile": "jemne drážkovaný / hladký, kvalita A"
+  },
+  "55978/1136": {
+    "productId": "jaf-f5deeb7b",
+    "widthMm": 117,
+    "thicknessMm": 26,
+    "lengthMm": 3600,
+    "profile": "jemne drážkovaný / hladký, kvalita B"
+  },
+  "55978/1139": {
+    "productId": "jaf-f5deeb7b",
+    "widthMm": 117,
+    "thicknessMm": 26,
+    "lengthMm": 3900,
+    "profile": "jemne drážkovaný / hladký, kvalita B"
+  },
+  "55978/1142": {
+    "productId": "jaf-f5deeb7b",
+    "widthMm": 117,
+    "thicknessMm": 26,
+    "lengthMm": 4200,
+    "profile": "jemne drážkovaný / hladký, kvalita B"
+  },
+  "55978/1145": {
+    "productId": "jaf-f5deeb7b",
+    "widthMm": 117,
+    "thicknessMm": 26,
+    "lengthMm": 4500,
+    "profile": "jemne drážkovaný / hladký, kvalita B"
+  },
+  "55978/1151": {
+    "productId": "jaf-f5deeb7b",
+    "widthMm": 117,
+    "thicknessMm": 26,
+    "lengthMm": 5100,
+    "profile": "jemne drážkovaný / hladký, kvalita B"
+  },
+  "55987/0230": {
+    "productId": "jaf-0c7e843e",
+    "widthMm": 140,
+    "thicknessMm": 26,
+    "lengthMm": 3000,
+    "profile": "kartáčovaný / hladký"
+  },
+  "55987/0245": {
+    "productId": "jaf-0c7e843e",
+    "widthMm": 140,
+    "thicknessMm": 26,
+    "lengthMm": 4500,
+    "profile": "kartáčovaný / hladký"
+  },
+  "55977/8125": {
+    "productId": "jaf-5e00cd1f",
+    "widthMm": 100,
+    "thicknessMm": 21,
+    "lengthMm": 2500,
+    "profile": "jemne drážkovaný / hladký"
+  },
+  "55977/8128": {
+    "productId": "jaf-5e00cd1f",
+    "widthMm": 100,
+    "thicknessMm": 21,
+    "lengthMm": 2800,
+    "profile": "jemne drážkovaný / hladký"
+  },
+  "55977/8140": {
+    "productId": "jaf-5e00cd1f",
+    "widthMm": 100,
+    "thicknessMm": 21,
+    "lengthMm": 4000,
+    "profile": "jemne drážkovaný / hladký"
+  },
+  "55693/1122": {
+    "productId": "jaf-ee1a57bb",
+    "widthMm": 118,
+    "thicknessMm": 21,
+    "lengthMm": 2200,
+    "profile": "Profil v cenníku nešpecifikovaný"
+  },
+  "55693/1124": {
+    "productId": "jaf-ee1a57bb",
+    "widthMm": 118,
+    "thicknessMm": 21,
+    "lengthMm": 2400,
+    "profile": "Profil v cenníku nešpecifikovaný"
+  },
+  "55693/1125": {
+    "productId": "jaf-ee1a57bb",
+    "widthMm": 118,
+    "thicknessMm": 21,
+    "lengthMm": 2500,
+    "profile": "Profil v cenníku nešpecifikovaný"
+  },
+  "55693/1134": {
+    "productId": "jaf-ee1a57bb",
+    "widthMm": 118,
+    "thicknessMm": 21,
+    "lengthMm": 3400,
+    "profile": "Profil v cenníku nešpecifikovaný"
+  },
+  "55693/1137": {
+    "productId": "jaf-ee1a57bb",
+    "widthMm": 118,
+    "thicknessMm": 21,
+    "lengthMm": 3700,
+    "profile": "Profil v cenníku nešpecifikovaný"
+  },
+  "55656/0100": {
+    "productId": "jaf-e7aa6c48",
+    "widthMm": 146,
+    "thicknessMm": 23,
+    "lengthMm": 4000,
+    "profile": "Profil v cenníku nešpecifikovaný"
+  },
+  "55656/0020": {
+    "productId": "jaf-70f93496",
+    "widthMm": 146,
+    "thicknessMm": 23,
+    "lengthMm": 4000,
+    "profile": "Profil v cenníku nešpecifikovaný"
+  },
+  "55656/0040": {
+    "productId": "jaf-f31b6be9",
+    "widthMm": 146,
+    "thicknessMm": 23,
+    "lengthMm": 4000,
+    "profile": "Profil v cenníku nešpecifikovaný"
+  },
+  "55656/0090": {
+    "productId": "jaf-b1fef536",
+    "widthMm": 146,
+    "thicknessMm": 23,
+    "lengthMm": 4000,
+    "profile": "Profil v cenníku nešpecifikovaný"
+  },
+  "55656/0080": {
+    "productId": "jaf-2415547b",
+    "widthMm": 146,
+    "thicknessMm": 23,
+    "lengthMm": 4000,
+    "profile": "Profil v cenníku nešpecifikovaný"
+  },
+  "55656/0060": {
+    "productId": "jaf-47a2c533",
+    "widthMm": 146,
+    "thicknessMm": 23,
+    "lengthMm": 4000,
+    "profile": "Profil v cenníku nešpecifikovaný"
+  },
+  "55937/0141": {
+    "productId": "jaf-bc22fc02",
+    "widthMm": 145,
+    "thicknessMm": 22,
+    "lengthMm": 4000,
+    "profile": "Profil v cenníku nešpecifikovaný"
+  },
+  "55937/0131": {
+    "productId": "jaf-2e669920",
+    "widthMm": 145,
+    "thicknessMm": 22,
+    "lengthMm": 4000,
+    "profile": "Profil v cenníku nešpecifikovaný"
+  }
+}

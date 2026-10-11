@@ -341,7 +341,7 @@ try {
     assert.equal(publicQuote.lines[0].priceGross, 23.12); assert.equal(publicQuote.lines[0].subtotalGross, 69.36); assert.equal(publicQuote.lines[0].articleNumber, board.articleNumber);
     await open(page, '/terasove-dosky', page.getByTestId('catalog-search')); await page.getByTestId('catalog-search').fill('99999/9999'); await page.getByRole('heading', { name: 'Nič sa nenašlo.', exact: true }).waitFor(); assert.equal(await page.locator('.platform-product-grid article').count(), 0);
     await open(page, '/planovac', page.getByTestId('planner-page')); await page.getByRole('button', { name: '03 Materiál', exact: true }).click(); await page.getByTestId('planner-product').selectOption(board.productId); await page.getByTestId('planner-variant').selectOption(board.variantId);
-    assert.equal(await page.getByTestId('planner-stock-article-number').innerText(), board.articleNumber); assert.match(await page.getByTestId('planner-stock-price').innerText(), /23,12/); assert.equal(await page.getByTestId('planner-add-cart').isDisabled(), true);
+    assert.equal(await page.getByTestId('planner-stock-article-number').innerText(), board.articleNumber); assert.match(await page.getByTestId('planner-stock-price').innerText(), /23,12/); assert.equal(await page.getByTestId('planner-add-cart').isDisabled(), false);
     return { unapprovedArticleRejected: true, incompleteCsvRejected: true, completeDraftArticles: 137, stagedPriceEur: 30, publicPriceEur: 23.12, photoPreservedInDraft: true, localAndFileBackupsRestored: true, publicPlannerUnaffected: true };
   });
 
@@ -476,9 +476,9 @@ try {
     const page = await newPage();
     await open(page, '/planovac', page.getByTestId('planner-page'));
     await page.getByRole('button', { name: '06 Výsledok', exact: true }).click();
-    await page.locator('.planner-empty').waitFor();
-    assert.equal(await page.getByTestId('planner-add-cart').isDisabled(), true);
-    assert.equal(await page.locator('.planner-cuts').count(), 0);
+    await page.locator('.planner-report tbody tr').first().waitFor();
+    assert.equal(await page.getByTestId('planner-add-cart').isDisabled(), false);
+    assert.ok(await page.locator('.planner-cuts').count() > 0);
     await page.emulateMedia({ media: 'print' });
     const print = await page.evaluate(() => ({
       planVisible: getComputedStyle(document.querySelector('.planner-print-plan')).display !== 'none',
@@ -489,7 +489,7 @@ try {
       hasDisclaimer: document.querySelector('.planner-print-plan').textContent.includes('Nejde o statický posudok'),
     }));
     assert.equal(print.planVisible, true); assert.equal(print.editorHidden, true); assert.equal(print.actionButtonsHidden, true);
-    assert.ok(print.boardPolygons > 1); assert.equal(print.materialRows, 0); assert.equal(print.hasDisclaimer, true);
+    assert.ok(print.boardPolygons > 1); assert.ok(print.materialRows > 0); assert.equal(print.hasDisclaimer, true);
     const pdf = await page.pdf({ path: join(output, 'planner-technical-report.pdf'), format: 'A4', printBackground: true, preferCSSPageSize: true, margin: { top: '12mm', bottom: '12mm', left: '12mm', right: '12mm' } });
     assert.equal(pdf.subarray(0, 5).toString(), '%PDF-'); assert.ok(pdf.length > 5000);
     report.artifacts.push('planner-technical-report.pdf');
@@ -591,8 +591,37 @@ try {
     await open(page, '/produkt/'+board.productId, page.getByTestId('product-variant'));
     assert.match(await page.locator('.platform-price').innerText(), /23,12/);
     await open(page, '/planovac', page.getByTestId('planner-page'));
-    assert.equal(await page.getByTestId('planner-add-cart').isDisabled(), true);
+    assert.equal(await page.getByTestId('planner-add-cart').isDisabled(), false);
     return { updatedDraftGross: 25, publicGross: 23.12, articles: 137, publication: false };
+  });
+
+  await check('technical SKU rules, cuts, source citations, settings persistence and exact BOM cart integration', async () => {
+    const page=await newPage({viewport:{width:1280,height:900}});
+    const fixture=fixtures.find(v=>v.articleNumber==='55978/0230');
+    await open(page,'/planovac?product='+fixture.productId+'&variant='+fixture.variantId,page.getByTestId('planner-page'));
+    await page.getByRole('button',{name:'02 Rozmery',exact:true}).click();
+    await page.getByTestId('planner-length').fill('8000');
+    await page.getByRole('button',{name:'04 Konštrukcia',exact:true}).click();
+    await page.getByTestId('technical-fixing').selectOption('profix-x');
+    assert.match(await page.getByTestId('technical-spacing').innerText(),/450 mm/);
+    await page.getByText('Pokročilé technické nastavenia',{exact:true}).click();
+    await page.getByTestId('technical-trimEachEndMm').fill('10');
+    await page.getByTestId('technical-sawKerfMm').fill('3');
+    assert.ok(Number(await page.getByTestId('planner-sync').getAttribute('data-joists'))>0);
+    assert.match(await page.getByTestId('planner-status').innerText(),/PDF s\./);
+    await page.getByTestId('planner-3d').click();
+    const scene=page.getByTestId('planner-scene');await scene.scrollIntoViewIfNeeded();
+    await page.waitForFunction(()=>document.querySelector('[data-testid="planner-scene"]')?.getAttribute('data-three-ready')==='true');
+    assert.equal(await scene.getAttribute('data-joist-count'),await page.getByTestId('planner-sync').getAttribute('data-joists'));
+    assert.equal(await scene.getAttribute('data-pedestal-count'),'0');
+    const saved=await jsonDownload(page,()=>page.getByRole('button',{name:'Stiahnuť projekt JSON',exact:true}).click(),'technical-project.json','moja-terasa.json');
+    assert.equal(saved.input.technical.trimEachEndMm,10);assert.equal(saved.input.technical.fixing,'profix-x');
+    await page.getByTestId('planner-add-cart').click();
+    assert.match(await page.locator('.planner-message').innerText(),/položiek bolo pridaných/);
+    await open(page,'/kosik',page.getByRole('button',{name:'EXPORT MATERIÁLOVÉHO ZOZNAMU ↓',exact:true}));
+    const quote=await jsonDownload(page,()=>page.getByRole('button',{name:'EXPORT MATERIÁLOVÉHO ZOZNAMU ↓',exact:true}).click(),'technical-bom-quote.json');
+    assert.ok(JSON.stringify(quote).includes('55985/0003'));assert.ok(!JSON.stringify(quote).includes('demo-'));
+    return {sourceRules:true,doubleJoists:true,noInventedPedestals:true,exactClipPack:true,projectRoundTrip:true};
   });
 
   await check('no application runtime or non-WebGL console errors', async () => {

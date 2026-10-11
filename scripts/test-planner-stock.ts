@@ -44,7 +44,7 @@ export function runPlannerStockTests(): { suite: string; passed: number; failed:
       const engine = toEngineProduct(item, selected, productCatalog);
       const selectedInput = { ...inputFor(item), variantId: selected.id };
       const visual = calculatePlan(selectedInput, engine);
-      check(engine.widthMm === selected.widthMm && engine.thicknessMm === selected.thicknessMm && engine.installationRules === null && visual.valid && visual.areaM2 === 10 && visual.materials.length === 0 && visual.stock.length === 0 && visual.joists.length === 0 && visual.pedestals.length === 0 && visual.technicalStatus === 'unavailable' && selected.articleNumber && selected.priceGross !== null && selected.availabilityBasis === 'pricelist', `Actual PDF article ${selected.articleNumber ?? selected.id} uses exact dimensions, PDF price provenance and no invented mounting rules.`);
+      check(engine.widthMm === selected.widthMm && engine.thicknessMm === selected.thicknessMm && engine.installationRules === null && visual.valid && visual.areaM2 === 10 && visual.pedestals.length === 0 && visual.technicalStatus !== 'verified' && engine.technical?.profile.article === selected.articleNumber && visual.materials.every(m => productCatalog.some(p => p.variants.some(v => v.id === m.variantId))) && selected.articleNumber && selected.priceGross !== null && selected.availabilityBasis === 'pricelist', `Actual PDF article ${selected.articleNumber ?? selected.id} uses exact dimensions, PDF price provenance and no invented mounting rules.`);
     }
   }
   return { suite: 'planner-stock-catalogue', passed, failed: 0 };

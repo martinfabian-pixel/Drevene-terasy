@@ -1,3 +1,4 @@
+import { calculateTechnicalPlan } from '../planner/technical/calculate';
 import { bounds, clipPolygonX, connectedRibbonParts, EPSILON, isOrthogonal, lineIntervals,
   offsetOrthogonal, perimeter, polygonArea, ribbonParts, roundMm, validateGeometry } from './geometry';
 import { optimizeStock } from './stock';
@@ -102,11 +103,12 @@ function transformResult(result:PlanResult):PlanResult {
   return result;
 }
 export function calculatePlan(input:PlanInput,product:EngineProduct):PlanResult {
+  if(product.technical)return calculateTechnicalPlan(input,product,next=>calculatePlan(next,{...product,technical:undefined,installationRules:null}));
   const result=emptyResult(input,product);
   const errors=validateGeometry(input.outline,input.holes);
   if(!['x','y'].includes(input.orientation))errors.push('Neplatný smer kladenia.');
   if(input.substrate!==undefined&&!['concrete','paving','soil'].includes(input.substrate))errors.push('Neplatný typ podkladu.');
-  if(!Number.isFinite(input.heightMm)||input.heightMm<30||input.heightMm>1000)errors.push('Výška musí byť od 30 do 1 000 mm.');
+  if(!Number.isFinite(input.heightMm)||input.heightMm<(product.status==='demo'?30:0)||input.heightMm>(product.status==='demo'?1000:3000))errors.push('Výška musí byť od 0 do 3 000 mm.');
   if(!Number.isFinite(input.gapMm)||input.gapMm<0||input.gapMm>30)errors.push('Škára musí byť od 0 do 30 mm.');
   if(!Number.isFinite(input.reservePercent)||input.reservePercent<0||input.reservePercent>50)errors.push('Rezerva musí byť od 0 do 50 %.');
   if(input.productId!==product.id || (input.variantId && input.variantId!==product.variantId))errors.push('Produkt alebo variant nezodpovedá vybranému materiálu.');

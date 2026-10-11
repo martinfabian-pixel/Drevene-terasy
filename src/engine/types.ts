@@ -1,7 +1,9 @@
+import type { TechnicalContext, TechnicalOptions, TechnicalReport, Evidence } from '../planner/technical/types';
 /** Millimetres throughout. No rule is a universal recommendation for a terrace. */
 export interface Point { x: number; y: number }
 export type DeckShape = 'rectangle' | 'square' | 'l' | 'u' | 'custom';
 export interface PlanInput {
+  technical?: TechnicalOptions;
   outline: Point[];
   holes: Point[][];
   orientation: 'x' | 'y';
@@ -44,6 +46,7 @@ export interface EngineProduct {
   availableLengthsMm: number[];
   status: 'demo' | 'verified' | 'draft';
   installationRules: ManufacturingRules | null;
+  technical?: TechnicalContext;
 }
 export interface BoardPiece {
   id: string;
@@ -76,6 +79,9 @@ export interface StockBoard {
   offcutMm: number;
   reusable: boolean;
   reserve: boolean;
+  trimMm?: number;
+  article?: string;
+  variantId?: string;
 }
 export interface MaterialItem {
   key: 'boards' | 'joists' | 'pedestals' | 'fixings' | 'edges';
@@ -83,14 +89,19 @@ export interface MaterialItem {
   variantId: string | null;
   name: string;
   quantity: number;
-  unit: 'ks' | 'bm';
+  unit: 'ks' | 'bm' | 'bal';
+  id?: string;
+  requiredPieces?: number;
+  packagePieces?: number;
+  article?: string;
   stockLengthMm?: number;
   verified: boolean;
 }
-export interface PlanWarning { code: string; message: string }
+export interface PlanWarning { code: string; message: string; source?: Evidence; severity?: 'review' | 'error' }
 export interface PlanResult {
   valid: boolean;
-  technicalStatus: 'demo' | 'verified' | 'unavailable';
+  technicalStatus: 'demo' | 'verified' | 'unavailable' | 'preliminary';
+  technicalReport?: TechnicalReport;
   warnings: PlanWarning[];
   outline: Point[];
   holes: Point[][];
