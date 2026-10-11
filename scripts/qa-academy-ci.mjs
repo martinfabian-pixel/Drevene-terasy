@@ -15,6 +15,7 @@ try{
  browser=await chromium.launch({headless:true});
  const pdfPage=await browser.newPage({locale:'sk-SK'});await pdfPage.goto(origin+route+'?print=1');await pdfPage.getByTestId('academy-manual').waitFor();await pdfPage.evaluate(()=>document.fonts.ready);
  assert.equal(await pdfPage.locator('tbody tr').count(),51);
+ await pdfPage.evaluate(()=>{for(const anchor of document.querySelectorAll('a[href]')){if(anchor instanceof HTMLAnchorElement && anchor.origin===location.origin)anchor.href=anchor.href.replace(location.origin,'https://martinfabian-pixel.github.io');}});
  const pdfPath=resolve(dist,'manuals/pod-povrchom-04.pdf');
  await pdfPage.pdf({path:pdfPath,format:'A4',printBackground:true,preferCSSPageSize:true,displayHeaderFooter:true,headerTemplate:'<div></div>',footerTemplate:'<div style="font-size:8px;width:100%;padding:0 15mm;color:#444;display:flex;justify-content:space-between"><span>DREVENÉ TERASY / POD POVRCHOM / 04 · 2026-10-11.1</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>',tagged:true,outline:true});
  const bytes=await readFile(pdfPath);assert.equal(bytes.subarray(0,5).toString(),'%PDF-');assert.ok(bytes.length>30000);report.pdf={bytes:bytes.length,path:'manuals/pod-povrchom-04.pdf',source:'Actual production manual, professional level, all SKU rows, SVG diagrams'};
