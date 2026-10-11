@@ -1,19 +1,20 @@
 import { useId, useState } from 'react';
 import { lunaExample } from './manual';
+import DiagramZoom from './DiagramZoom';
 
 const layers = ['Dosky','Dištančné prvky','Podkonštrukcia','Podpery','Podklad','Spojovací materiál'];
 export default function TechnicalDiagram({kind='assembly',staticView=false}:{kind?:'assembly'|'joint'|'orientation';staticView?:boolean}) {
  const [risk,setRisk]=useState(false),[hidden,setHidden]=useState<string[]>([]);
- const [zoom,setZoom]=useState(false);
+
  const id=useId().replace(/:/g,''); const show=(n:number)=>!hidden.includes(layers[n]);
  const p=lunaExample?.rules;
  const value=(key:'jointGap'|'doubleJoistClearance'|'endFixingOffset'|'sideFixingOffset')=>p?.[key].status==='verified'?p[key].value:null;
  const title=kind==='joint'?'Čelný spoj — pozdĺžny rez':kind==='orientation'?'Orientácia prierezu — modelový príklad':'Vrstvy terasy — principiálny rez';
  return <figure className="academy-diagram" data-testid={staticView?undefined:'diagram-'+kind}>
   <figcaption><strong>{title}</strong><span>{kind==='joint'?'Rozmery len pre priradený systém Lunawood; nie statický návrh.':'Principiálna schéma; nie realizačný detail.'}</span></figcaption>
-  {!staticView&&<><div className="academy-segment" role="group" aria-label={'Riešenie: '+title}><button aria-pressed={!risk} onClick={()=>setRisk(false)}>Odporúčaný princíp</button><button aria-pressed={risk} onClick={()=>setRisk(true)}>Rizikový detail</button></div>{kind!=='orientation'&&<fieldset className="academy-layers"><legend>Zobrazené vrstvy</legend>{layers.map(label=><label key={label}><input type="checkbox" checked={!hidden.includes(label)} onChange={()=>setHidden(v=>v.includes(label)?v.filter(x=>x!==label):[...v,label])}/>{label}</label>)}</fieldset>}</>}
-  {!staticView&&<button className="academy-zoom" aria-pressed={zoom} onClick={()=>setZoom(!zoom)}>{zoom?'Zmenšiť detail':'Zväčšiť detail'}</button>}
-  <div className={'academy-drawing'+(zoom?' is-zoomed':'')} tabIndex={zoom?0:undefined} role={zoom?'region':undefined} aria-label={zoom?'Zväčšený technický detail':undefined}>
+  {!staticView&&<><div className="academy-segment" role="group" aria-label={'Riešenie: '+title}><button aria-pressed={!risk} onClick={()=>setRisk(false)}>Odporúčaný princíp</button><button aria-pressed={risk} onClick={()=>setRisk(true)}>Rizikový detail</button></div>{kind!=='orientation'&&<details className="au-layer-disclosure"><summary>Zobrazené vrstvy <span>+</span></summary><fieldset className="academy-layers"><legend>Zobrazené vrstvy</legend>{layers.map(label=><label key={label}><input type="checkbox" checked={!hidden.includes(label)} onChange={()=>setHidden(v=>v.includes(label)?v.filter(x=>x!==label):[...v,label])}/>{label}</label>)}</fieldset></details>}</>}
+  {!staticView&&<DiagramZoom/>}
+  <div className="academy-drawing">
   <svg viewBox="0 0 720 400" role="img" aria-labelledby={id+'title '+id+'desc'}>
    <title id={id+'title'}>{title}</title><desc id={id+'desc'}>{risk?'Riziko zadržiavania vody a nevhodného kontaktu.':'Oddelené kontakty, samostatné podopretie a voľná cesta vody.'} {kind==='orientation'?'Porovnanie hornej šírky 40 a 70 mm. Rozmery sú ilustračné.':''}</desc>
    <defs><pattern id={id+'wood'} width="16" height="12" patternUnits="userSpaceOnUse"><rect width="16" height="12" fill="#c5a578"/><path d="M0 4h16M4 8h9" stroke="#a88557" strokeWidth=".6"/></pattern><marker id={id+'arrow'} markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto-start-reverse"><path d="M0 0 8 4 0 8" fill="none" stroke="#226779"/></marker></defs>
