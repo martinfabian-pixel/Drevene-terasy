@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm, stat, writeFile, mkdir } from 'node:fs/promises';
+import { copyFile, mkdtemp, readFile, rm, stat, writeFile, mkdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -26,29 +26,55 @@ const interactive = (topic, step) => base + '#/pod-povrchom/sprievodca/' + slug(
 const staticStep = (topic, step) => publicRoot + slug(topic) + '/' + slug(step) + '/';
 const paragraphs = values => values.map(value => '<p>' + escape(value) + '</p>').join('');
 const css = `
-  :root{color-scheme:light;font-family:Arial,Helvetica,sans-serif;color:#101010;background:#f7f7f4;font-synthesis:none}
-  *{box-sizing:border-box}body{margin:0}a{color:inherit;text-underline-offset:.2em}a:focus-visible,summary:focus-visible{outline:3px solid #101010;outline-offset:5px}
-  .bar{padding:24px max(20px,calc((100vw - 1160px)/2));border-bottom:1px solid #d6d6d1;display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;font-size:13px;letter-spacing:.04em}
-  .bar a{text-decoration:none}.brand{font-weight:700}.crumbs{display:flex;flex-wrap:wrap;gap:14px}
-  main{width:min(100% - 40px,1040px);margin:58px auto 80px}.eyebrow{font-size:12px;letter-spacing:.13em;font-weight:700;text-transform:uppercase}
-  h1{font-size:clamp(34px,6vw,68px);line-height:1.03;letter-spacing:-.055em;margin:20px 0 26px;overflow-wrap:anywhere;max-width:950px}
-  h2{font-size:clamp(22px,3vw,31px);letter-spacing:-.035em;margin:38px 0 18px}p,li{font-size:17px;line-height:1.65;max-width:760px;overflow-wrap:anywhere}.lead{font-size:clamp(20px,2.5vw,26px);line-height:1.45;max-width:760px}
-  .button{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:14px 22px;background:#101010;color:#f7f7f4;text-decoration:none;font-size:14px;font-weight:700;letter-spacing:.02em}
-  .button.accent{background:#c8ff32;color:#101010}.actions{display:flex;flex-wrap:wrap;gap:16px;margin:30px 0 44px;align-items:center}.actions>a:not(.button){min-height:44px;display:inline-flex;align-items:center}
-  .summary{margin:32px 0;padding:20px 0 20px 24px;border-left:5px solid #c8ff32}.summary p{margin:0}.notice{padding:18px 22px;background:#e7e7e1;border-left:3px solid #101010;margin:24px 0}.notice p{font-size:16px}.notice strong{font-size:14px}
-  .contents{list-style:none;padding:0;margin:30px 0}.contents li{margin:0;border-top:1px solid #cecec8;max-width:none}.contents a{display:block;padding:22px 0;text-decoration:none}.contents a:hover{text-decoration:underline}.contents span{display:block;font-size:12px;letter-spacing:.08em;margin-bottom:9px}.contents strong{font-size:24px;line-height:1.15;letter-spacing:-.02em}.contents p{margin:9px 0 0;font-size:16px}
-  .technical{border-top:1px solid #cecec8;border-bottom:1px solid #cecec8;margin:34px 0;padding:20px 0}.technical summary{font-size:18px;font-weight:700;cursor:pointer;min-height:44px;padding:12px 0}.technical p{font-size:16px}
-  .sources p{font-size:14px;color:#3e3e3b}.stepnav{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:18px;border-top:1px solid #cecec8;padding-top:25px;margin-top:44px}.stepnav a{padding:14px 0;min-height:44px}.stepnav .button{padding:14px 22px}.stepnav span{font-size:13px}.scope{font-size:14px;color:#4b4b48}.footer{border-top:1px solid #cecec8;padding:24px max(20px,calc((100vw - 1160px)/2));font-size:12px;line-height:1.6}
-  @media(max-width:480px){.bar{padding:20px}.crumbs{gap:12px}main{margin-top:32px}h1{font-size:40px}.actions{display:block}.actions>a{margin:0 0 12px}.stepnav{gap:8px}.stepnav .button{padding:14px}.summary{padding-left:18px}.contents strong{font-size:22px}}
+  @media screen {
+    :root{color-scheme:light;font-family:var(--ds-font);color:var(--ds-ink);background:var(--ds-paper);font-synthesis:none}
+    *{box-sizing:border-box}body{margin:0;font:var(--ds-body)/1.5 var(--ds-font)}a{color:inherit;text-underline-offset:.2em}a:focus-visible,summary:focus-visible{outline:2px solid var(--ds-ink);outline-offset:5px}
+    .bar{padding:var(--ds-space-5) max(var(--ds-gutter,16px),calc((100vw - var(--ds-container))/2));border-bottom:1px solid var(--ds-line);display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--ds-space-4);font-size:var(--ds-small)}
+    .bar a{text-decoration:none;min-height:44px;display:inline-flex;align-items:center}.brand{font-weight:700}.crumbs{display:flex;flex-wrap:wrap;gap:var(--ds-space-4)}
+    main{width:min(calc(100% - 2 * var(--ds-gutter,16px)),var(--ds-container));margin:var(--ds-space-8) auto var(--ds-space-9)}.eyebrow{font-size:var(--ds-small);letter-spacing:.025em;text-transform:uppercase;color:var(--ds-muted)}
+    h1{font-family:var(--ds-display);font-size:var(--ds-h1);font-weight:700;line-height:1.3;letter-spacing:0;margin:var(--ds-space-5) 0 var(--ds-space-6);overflow-wrap:anywhere;max-width:950px}
+    h2{font-size:var(--ds-h2);font-weight:700;line-height:1.5;letter-spacing:0;margin:var(--ds-space-7) 0 var(--ds-space-4)}p,li{font-size:var(--ds-body);line-height:1.5;max-width:760px;overflow-wrap:anywhere}.lead{font-size:var(--ds-body);line-height:1.5;max-width:760px}
+    .button{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:var(--ds-space-3) var(--ds-space-5);background:var(--ds-ink);color:var(--ds-paper);text-decoration:none;font-size:var(--ds-small);font-weight:700}.button:hover{background:var(--ds-muted)}
+    .actions{display:flex;flex-wrap:wrap;gap:var(--ds-space-4);margin:var(--ds-space-6) 0 var(--ds-space-7);align-items:center}.actions>a:not(.button){min-height:44px;display:inline-flex;align-items:center}
+    .summary{margin:var(--ds-space-6) 0;padding:var(--ds-space-5) 0 var(--ds-space-5) var(--ds-space-5);border-left:2px solid var(--ds-ink)}.summary p{margin:0}.notice{padding:var(--ds-space-4) var(--ds-space-5);background:var(--ds-soft);border-left:2px solid var(--ds-ink);margin:var(--ds-space-5) 0}.notice p,.notice strong{font-size:var(--ds-small)}
+    .contents{list-style:none;padding:0;margin:var(--ds-space-6) 0}.contents li{margin:0;border-top:1px solid var(--ds-line);max-width:none}.contents a{display:block;padding:var(--ds-space-5) 0;text-decoration:none}.contents a:hover{text-decoration:underline}.contents span{display:block;font-size:var(--ds-small);color:var(--ds-muted);margin-bottom:var(--ds-space-2)}.contents strong{font-size:var(--ds-h3);line-height:1.5;letter-spacing:0}.contents p{margin:var(--ds-space-2) 0 0;font-size:var(--ds-body)}
+    .technical{border-top:1px solid var(--ds-line);border-bottom:1px solid var(--ds-line);margin:var(--ds-space-6) 0;padding:var(--ds-space-5) 0}.technical summary{font-size:var(--ds-body);font-weight:700;cursor:pointer;min-height:44px;padding:var(--ds-space-3) 0}.technical p{font-size:var(--ds-body)}
+    .sources p{font-size:var(--ds-small);color:var(--ds-muted)}.stepnav{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:var(--ds-space-4);border-top:1px solid var(--ds-line);padding-top:var(--ds-space-5);margin-top:var(--ds-space-7)}.stepnav a{padding:var(--ds-space-3) 0;min-height:44px}.stepnav .button{padding:var(--ds-space-3) var(--ds-space-5)}.stepnav span{font-size:var(--ds-small)}.scope{font-size:var(--ds-small);color:var(--ds-muted)}.footer{border-top:1px solid var(--ds-line);padding:var(--ds-space-5) max(var(--ds-gutter,16px),calc((100vw - var(--ds-container))/2));font-size:var(--ds-small);line-height:1.5}
+    @media(max-width:480px){.bar{padding:var(--ds-space-4)}.crumbs{gap:var(--ds-space-3)}main{margin-top:var(--ds-space-6)}.actions{display:block}.actions>a{margin:0 0 var(--ds-space-3)}.stepnav{gap:var(--ds-space-2)}.stepnav .button{padding:var(--ds-space-3)}.summary{padding-left:var(--ds-space-4)}}
+  }
   @media print{.bar,.actions,.stepnav,.footer{display:none}body{background:white}main{width:100%;margin:0}.technical{break-inside:avoid}h1{font-size:36px}a{color:black}}
 `;
+let fontStyleLinks = '';
 
 function page({ title, description, canonical, body, topic }) {
   const metadata = { '@context': 'https://schema.org', '@type': 'WebPage', name: title, description, url: canonical, inLanguage: 'sk', isPartOf: { '@type': 'WebSite', name: 'Drevené terasy — Pod povrchom', url: publicRoot } };
-  return '<!doctype html>\n<html lang="sk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>' + escape(title) + ' | Pod povrchom — Drevené terasy</title><meta name="description" content="' + escape(description) + '"><meta name="robots" content="index,follow"><link rel="canonical" href="' + escape(canonical) + '"><meta property="og:type" content="article"><meta property="og:title" content="' + escape(title) + '"><meta property="og:description" content="' + escape(description) + '"><meta property="og:url" content="' + escape(canonical) + '"><style>' + css + '</style><script type="application/ld+json">' + JSON.stringify(metadata).replace(/</g, '\\u003c') + '</script></head><body><header class="bar"><a class="brand" href="' + base + '#/pod-povrchom">DREVENÉ TERASY / POD POVRCHOM</a><nav class="crumbs" aria-label="Navigácia dokumentácie"><a href="' + publicRoot + '">Sprievodcovia</a>' + (topic ? '<a href="' + publicRoot + slug(topic.id) + '/">' + escape(topic.title) + '</a>' : '') + '<a href="' + library + '">Technická knižnica ↗</a></nav></header><main id="main">' + body + '</main><footer class="footer">POD POVRCHOM / Textová verzia spoločných odborných podkladov. Technické hodnoty platia len pre príslušný výrobok a montážny systém. Výstup nenahrádza staticky overenú realizačnú dokumentáciu.</footer></body></html>\n';
+  return '<!doctype html>\n<html lang="sk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>' + escape(title) + ' | Pod povrchom — Drevené terasy</title><meta name="description" content="' + escape(description) + '"><meta name="robots" content="index,follow"><link rel="canonical" href="' + escape(canonical) + '"><meta property="og:type" content="article"><meta property="og:title" content="' + escape(title) + '"><meta property="og:description" content="' + escape(description) + '"><meta property="og:url" content="' + escape(canonical) + '"><link rel="stylesheet" href="' + base + 'design-system.css">' + fontStyleLinks + '<style>' + css + '</style><script type="application/ld+json">' + JSON.stringify(metadata).replace(/</g, '\\u003c') + '</script></head><body><header class="bar"><a class="brand" href="' + base + '#/pod-povrchom">DREVENÉ TERASY / POD POVRCHOM</a><nav class="crumbs" aria-label="Navigácia dokumentácie"><a href="' + publicRoot + '">Sprievodcovia</a>' + (topic ? '<a href="' + publicRoot + slug(topic.id) + '/">' + escape(topic.title) + '</a>' : '') + '<a href="' + library + '">Technická knižnica ↗</a></nav></header><main id="main">' + body + '</main><footer class="footer">POD POVRCHOM / Textová verzia spoločných odborných podkladov. Technické hodnoty platia len pre príslušný výrobok a montážny systém. Výstup nenahrádza staticky overenú realizačnú dokumentáciu.</footer></body></html>\n';
 }
 
 try {
+  await mkdir(dist, { recursive: true });
+  await copyFile(join(root, 'src/styles/design-system.css'), join(dist, 'design-system.css'));
+  // Copy licensed font assets without depending on Vite's hashed CSS bundle.
+  // The isolated data-test fixture intentionally has no node_modules directory.
+  const fontSource = join(root, 'node_modules/@fontsource/open-sans');
+  let hasLocalFont = false;
+  try { hasLocalFont = (await stat(fontSource)).isDirectory(); } catch (error) { if (error.code !== 'ENOENT') throw error; }
+  if (hasLocalFont) {
+    const fontTarget = join(dist, 'fonts/open-sans');
+    await mkdir(join(fontTarget, 'files'), { recursive: true });
+    for (const subset of ['latin', 'latin-ext']) for (const weight of [400, 600, 700]) {
+      const name = subset + '-' + weight + '.css';
+      const stylesheet = await readFile(join(fontSource, name), 'utf8');
+      await copyFile(join(fontSource, name), join(fontTarget, name));
+      for (const match of stylesheet.matchAll(/url\(['"]?(\.\/files\/[^'"\)]+)['"]?\)/g)) {
+        const relativeFont = match[1];
+        if (!/^\.\/files\/[a-z0-9.-]+\.(?:woff2?|ttf)$/.test(relativeFont)) throw Error('Unexpected Open Sans font path: ' + relativeFont);
+        await copyFile(join(fontSource, relativeFont), join(fontTarget, relativeFont));
+      }
+      fontStyleLinks += '<link rel="stylesheet" href="' + base + 'fonts/open-sans/' + name + '">';
+    }
+    await copyFile(join(fontSource, 'LICENSE'), join(fontTarget, 'LICENSE'));
+  }
   const entry = join(root, 'src/academy/journeys.ts');
   const bundle = await esbuild.build({
     stdin: { contents: await readFile(entry, 'utf8'), sourcefile: entry, resolveDir: dirname(entry), loader: 'ts' },
@@ -113,7 +139,7 @@ try {
   let appIndex = await readFile(appIndexPath, 'utf8');
   const marker = 'id="academy-static-fallback"';
   if (!appIndex.includes(marker)) {
-    const fallback = '<noscript ' + marker + '><div style="max-width:760px;margin:32px auto;padding:24px;font:18px/1.6 Arial,sans-serif;color:#101010;background:#f7f7f4"><h1>POD POVRCHOM</h1><p>Rozumieme drevu. Od prvého návrhu až po posledný detail montáže.</p><a href="' + base + 'academy-guides/">Otvoriť odborných sprievodcov bez JavaScriptu →</a></div></noscript>';
+    const fallback = '<noscript ' + marker + '><div style="max-width:760px;margin:var(--ds-space-6) auto;padding:var(--ds-space-5);font:var(--ds-body)/1.5 var(--ds-font);color:var(--ds-ink);background:var(--ds-paper)"><h1>POD POVRCHOM</h1><p>Rozumieme drevu. Od prvého návrhu až po posledný detail montáže.</p><a href="' + base + 'academy-guides/">Otvoriť odborných sprievodcov bez JavaScriptu →</a></div></noscript>';
     if (!/<\/body>/i.test(appIndex)) throw Error('Built index.html has no closing body.');
     appIndex = appIndex.replace(/<\/body>/i, fallback + '</body>');
     await writeFile(appIndexPath, appIndex, 'utf8');

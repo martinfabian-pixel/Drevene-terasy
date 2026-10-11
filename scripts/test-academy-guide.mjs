@@ -107,8 +107,9 @@ for (const topic of journeys) {
 }
 equal(steps, 39, 'Complete current guide coverage');
 
-for (const directory of ['scripts', 'src/academy', 'dist']) await mkdir(join(fixture, directory), { recursive: true });
+for (const directory of ['scripts', 'src/academy', 'src/styles', 'dist']) await mkdir(join(fixture, directory), { recursive: true });
 await copyFile(join(root, 'scripts/prerender-academy-guides.mjs'), join(fixture, 'scripts/prerender-academy-guides.mjs'));
+await copyFile(join(root, 'src/styles/design-system.css'), join(fixture, 'src/styles/design-system.css'));
 const sourceLink = relative(join(fixture, 'src/academy'), join(sourceDirectory, 'journeys.ts')).replace(/\\/g, '/');
 await writeFile(join(fixture, 'src/academy/journeys.ts'), "export { journeys, getStepData } from '" + (sourceLink.startsWith('.') ? '' : './') + sourceLink + "';\n", 'utf8');
 await writeFile(join(fixture, 'dist/index.html'), '<!doctype html><html lang="sk"><body><div id="root"></div></body></html>', 'utf8');
@@ -123,6 +124,9 @@ ok(app.includes('<noscript') && app.includes('/Drevene-terasy/academy-guides/'),
 const sitemap = await readFile(join(fixture, 'dist/academy-guides/sitemap.xml'), 'utf8');
 equal((sitemap.match(/<loc>/g) ?? []).length, 46, 'Complete canonical sitemap');
 const index = await readFile(join(fixture, 'dist/academy-guides/index.html'), 'utf8');
+ok(index.includes('rel="stylesheet" href="/Drevene-terasy/design-system.css"'), 'Readable pages share the storefront stylesheet');
+equal(await readFile(join(fixture, 'dist/design-system.css'), 'utf8'), await readFile(join(root, 'src/styles/design-system.css'), 'utf8'), 'Exact central design tokens copied to readable output');
+ok(!index.includes('#c8ff32'), 'No legacy neon in readable HTML');
 for (const topic of journeys) {
   const topicHTML = await readFile(join(fixture, 'dist/academy-guides', topic.id, 'index.html'), 'utf8');
   ok(topicHTML.includes(escaped(topic.title)), 'Static topic index title');

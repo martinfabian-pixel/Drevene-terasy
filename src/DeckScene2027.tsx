@@ -290,7 +290,7 @@ function buildScene(three: ThreeModule, host: HTMLDivElement, onReady: () => voi
         const materials = Array.isArray(object.material) ? object.material : [object.material];
         for (const finish of materials) {
           if (!(finish instanceof three.MeshStandardMaterial)) continue;
-          finish.emissive.set(layer === index ? '#a6c83d' : '#000000');
+          finish.emissive.set(layer === index ? '#666666' : '#000000');
           finish.emissiveIntensity = layer === index ? 0.16 : 0;
         }
       });

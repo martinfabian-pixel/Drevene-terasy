@@ -68,7 +68,7 @@ export default function Planner({ concept }: { concept: ConceptId }) {
     const x = (760 - rectWidth) / 2;
     const y = (500 - rectHeight) / 2;
     const boardLines = Array.from({ length: 19 }, (_, index) => (index + 1) / 20);
-    return <svg className="planner-drawing" viewBox="0 0 760 510" role="img" aria-label={`Pôdorys obdĺžnikovej terasy, dĺžka ${fmt(length)} metrov, šírka ${fmt(width)} metrov, plocha ${fmt(area)} metrov štvorcových.`}>
+    return <svg className="planner-drawing technical-svg" viewBox="0 0 760 510" role="img" aria-label={`Pôdorys obdĺžnikovej terasy, dĺžka ${fmt(length)} metrov, šírka ${fmt(width)} metrov, plocha ${fmt(area)} metrov štvorcových.`}>
       <defs>
         <pattern id={`${instance}-grid`} width="25" height="25" patternUnits="userSpaceOnUse"><path d="M25 0H0V25" fill="none" stroke="currentColor" strokeWidth=".45" opacity=".1" /></pattern>
         <linearGradient id={`${instance}-planwood`} x1="0" y1="0" x2="1" y2="1"><stop stopColor={appearance.light} /><stop offset="1" stopColor={appearance.mid} /></linearGradient>

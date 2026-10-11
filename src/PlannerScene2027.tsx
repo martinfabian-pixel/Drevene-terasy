@@ -431,7 +431,7 @@ function PlanFallback({ result, showStructure, color }: { result: PlanResult; sh
   const bounds = boundsOf(result.outline);
   const pad = Math.max(bounds.width, bounds.height) * 0.08;
   const path = (points: Point[]) => points.map((point, index) => `${index ? 'L' : 'M'}${point.x},${point.y}`).join(' ') + ' Z';
-  return <svg viewBox={`${bounds.minX - pad} ${bounds.minY - pad} ${bounds.width + pad * 2} ${bounds.height + pad * 2}`} width="100%" height="100%" role="img" aria-label="Presný 2D náhľad rovnakého návrhu terasy ako v 3D." style={{ display: 'block' }}>
+  return <svg className="technical-svg" viewBox={`${bounds.minX - pad} ${bounds.minY - pad} ${bounds.width + pad * 2} ${bounds.height + pad * 2}`} width="100%" height="100%" role="img" aria-label="Presný 2D náhľad rovnakého návrhu terasy ako v 3D." style={{ display: 'block' }}>
     <path d={[path(result.outline), ...result.holes.map(path)].join(' ')} fill="#b1b5af" fillRule="evenodd" stroke="#777c78" strokeWidth={bounds.width * 0.002} />
     {showStructure && result.pedestals.map(point => <circle key={point.id} cx={point.x} cy={point.y} r={45} fill="#242424" />)}
     {showStructure && result.joists.map(segment => <line key={segment.id} x1={segment.start.x} y1={segment.start.y} x2={segment.end.x} y2={segment.end.y} stroke="#514d3e" strokeWidth={segment.widthMm} />)}

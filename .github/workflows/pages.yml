@@ -43,13 +43,17 @@ jobs:
       - name: Verify interactive academy guide journeys and mobile screens
         run: node scripts/qa-academy-guide-ci.mjs
         env:
-          ACADEMY_GUIDE_REVIEW_EXPORT: '1'
+          ACADEMY_GUIDE_REVIEW_EXPORT: '0'
       - name: Verify responsive homepage and interactions
         run: npm run test:homepage
       - name: Verify catalog, planner, cart and responsive platform
         run: npm run test:platform
       - name: Verify quote exports, demo administration, touch controls and WebKit
         run: timeout 420s npm run test:platform-extra
+      - name: Verify whole-site neutral design, immutable data and direct routes
+        run: node scripts/qa-site-design-ci.mjs
+        env:
+          SITE_DESIGN_REVIEW_EXPORT: '1'
       - name: Save viewport screenshots and report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -61,6 +65,7 @@ jobs:
             qa/ci-platform-extra
             qa/ci-academy
             qa/ci-academy-guide
+            qa/ci-site-design
           retention-days: 14
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5

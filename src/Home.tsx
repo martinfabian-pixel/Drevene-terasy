@@ -14,7 +14,7 @@ function TerraceDrawing({ tone = 'natural', flat = false, technical = false }: {
   };
   const shades = palette[tone] || palette.natural;
   const boards = Array.from({ length: 20 }, (_, i) => i);
-  return <svg className={`terrace-drawing ${technical ? 'is-technical' : ''}`} viewBox="0 0 720 500" role="img" aria-label={flat ? 'Ilustračný pôdorys terasy s doskami' : 'Ilustračný priestorový návrh terasy s doskami'}>
+  return <svg className={`terrace-drawing ${technical || flat ? 'is-technical technical-svg' : ''}`} viewBox="0 0 720 500" role="img" aria-label={flat ? 'Ilustračný pôdorys terasy s doskami' : 'Ilustračný priestorový návrh terasy s doskami'}>
     <defs>
       <filter id={`scene-shadow-${tone}-${flat}`} x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="13" /></filter>
       <pattern id={`scene-grid-${tone}-${flat}`} width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="currentColor" strokeWidth=".6" opacity=".13" /></pattern>

@@ -1,0 +1,85 @@
+/*
+ * Screen palette for our own technical SVG drawings.
+ * Original presentation attributes remain the source for the existing PDF
+ * documents. Realistic Three.js materials and photographic assets are outside
+ * this scope. Geometry, dimensions, visibility and pointer targets are untouched.
+ */
+@media screen {
+  body:not(:has(.academy-print-document)) .technical-svg {
+    --drawing-paper: var(--ds-paper, #fff);
+    --drawing-ink: var(--ds-technical-line, #171717);
+    --drawing-fill: var(--ds-technical-fill, #e5e5e5);
+    --drawing-mid: #bcbcbc;
+    --drawing-dark: #666;
+    color: var(--drawing-ink);
+    background: var(--drawing-paper);
+  }
+
+  /* Keep pattern references and transparent hit areas, recolour solid faces. */
+  body:not(:has(.academy-print-document)) .technical-svg [fill]:not([fill="none"]):not([fill="transparent"]):not([fill^="url("]):not([fill="currentColor"]) {
+    fill: var(--drawing-fill);
+  }
+  body:not(:has(.academy-print-document)) .technical-svg [stroke]:not([stroke="none"]) {
+    stroke: var(--drawing-ink);
+  }
+  body:not(:has(.academy-print-document)) .technical-svg :is(text,tspan) {
+    fill: var(--drawing-ink);
+  }
+  body:not(:has(.academy-print-document)) .technical-svg stop {
+    stop-color: var(--drawing-fill);
+  }
+  body:not(:has(.academy-print-document)) .technical-svg stop[offset="1"] {
+    stop-color: var(--drawing-mid);
+  }
+
+  /* Structural members, fixings and section edges retain distinct grey tones. */
+  body:not(:has(.academy-print-document)) .technical-svg :is(
+    [fill="#444b42"], [fill="#545952"], [fill="#353535"], [fill="#444"],
+    [fill="#555"], [fill="#6d6558"], [fill="#88704f"], [fill="#806749"],
+    [fill="#8b714f"], [fill="#737b77"], [fill="#353c3f"],
+    [fill="#242424"], [fill="#101010"], [fill="#222"],
+    [fill="#3c5148"], [fill="#243a31"], [fill="#352d26"]
+  ) {
+    fill: var(--drawing-dark);
+  }
+  body:not(:has(.academy-print-document)) .technical-svg :is(
+    [fill="#8a969a"], [fill="#b7b9b3"], [fill="#a8aaa4"],
+    [fill="#b6bbb1"], [fill="#b1b5af"], [fill="#694c36"]
+  ) {
+    fill: var(--drawing-mid);
+  }
+
+  /* Water remains recognisable through arrowheads and a dashed line convention. */
+  body:not(:has(.academy-print-document)) .technical-svg :is(
+    [stroke="#226779"], [stroke="#245d71"]
+  ):not(marker *) {
+    stroke-dasharray: 7 4;
+  }
+
+  /* Risk remains identified by the existing labels and emphatic dark marks. */
+  body:not(:has(.academy-print-document)) .technical-svg :is(
+    [fill="#833"], [fill="#914b37"]
+  ) {
+    fill: var(--drawing-dark);
+  }
+
+  /* White centres distinguish editable vertices from black structural points. */
+  body:not(:has(.academy-print-document)) .technical-svg :is(
+    [fill="#c8ff32"], [fill="#C8FF32"], [fill="#a3c837"],
+    [fill="#fff"], [fill="#f8faf4"], [fill="#f7f7f4"], [fill="#eee"]
+  ) {
+    fill: var(--drawing-paper);
+  }
+  body:not(:has(.academy-print-document)) .technical-svg [fill="#a3c837"] {
+    stroke: var(--drawing-ink);
+    stroke-width: 1;
+  }
+  body:not(:has(.academy-print-document)) .technical-svg [role="button"]:focus-visible {
+    stroke: var(--drawing-ink);
+    outline: 2px solid var(--drawing-ink);
+    outline-offset: 4px;
+  }
+  body:not(:has(.academy-print-document)) .technical-svg text[paint-order="stroke"] {
+    stroke: var(--drawing-paper);
+  }
+}
