@@ -1,9 +1,10 @@
 import { useId, useState } from 'react';
 import { lunaExample } from './manual';
 import DiagramZoom from './DiagramZoom';
+import type {GuideInteraction} from './journeys';
 
 const layers = ['Dosky','Dištančné prvky','Podkonštrukcia','Podpery','Podklad','Spojovací materiál'];
-export default function TechnicalDiagram({kind='assembly',staticView=false}:{kind?:'assembly'|'joint'|'orientation';staticView?:boolean}) {
+export default function TechnicalDiagram({kind='assembly',staticView=false,guide}:{kind?:'assembly'|'joint'|'orientation';staticView?:boolean;guide?:GuideInteraction}) {
  const [risk,setRisk]=useState(false),[hidden,setHidden]=useState<string[]>([]);
 
  const id=useId().replace(/:/g,''); const show=(n:number)=>!hidden.includes(layers[n]);
@@ -12,7 +13,7 @@ export default function TechnicalDiagram({kind='assembly',staticView=false}:{kin
  const title=kind==='joint'?'Čelný spoj — pozdĺžny rez':kind==='orientation'?'Orientácia prierezu — modelový príklad':'Vrstvy terasy — principiálny rez';
  return <figure className="academy-diagram" data-testid={staticView?undefined:'diagram-'+kind}>
   <figcaption><strong>{title}</strong><span>{kind==='joint'?'Rozmery len pre priradený systém Lunawood; nie statický návrh.':'Principiálna schéma; nie realizačný detail.'}</span></figcaption>
-  {!staticView&&<><div className="academy-segment" role="group" aria-label={'Riešenie: '+title}><button aria-pressed={!risk} onClick={()=>setRisk(false)}>Odporúčaný princíp</button><button aria-pressed={risk} onClick={()=>setRisk(true)}>Rizikový detail</button></div>{kind!=='orientation'&&<details className="au-layer-disclosure"><summary>Zobrazené vrstvy <span>+</span></summary><fieldset className="academy-layers"><legend>Zobrazené vrstvy</legend>{layers.map(label=><label key={label}><input type="checkbox" checked={!hidden.includes(label)} onChange={()=>setHidden(v=>v.includes(label)?v.filter(x=>x!==label):[...v,label])}/>{label}</label>)}</fieldset></details>}</>}
+  {!staticView&&<>{(guide===undefined||guide==='compare')&&<div className="academy-segment" role="group" aria-label={'Riešenie: '+title}><button aria-pressed={!risk} onClick={()=>setRisk(false)}>Odporúčaný princíp</button><button aria-pressed={risk} onClick={()=>setRisk(true)}>Rizikový detail</button></div>}{guide==='layers'&&<button className="ag-reveal" aria-pressed={!show(0)} onClick={()=>setHidden(show(0)?[layers[0],layers[1],layers[5]]:[])}>{show(0)?'Odkryť podkonštrukciu':'Zobraziť všetky vrstvy'}</button>}{guide===undefined&&kind!=='orientation'&&<details className="au-layer-disclosure"><summary>Zobrazené vrstvy <span>+</span></summary><fieldset className="academy-layers"><legend>Zobrazené vrstvy</legend>{layers.map(label=><label key={label}><input type="checkbox" checked={!hidden.includes(label)} onChange={()=>setHidden(v=>v.includes(label)?v.filter(x=>x!==label):[...v,label])}/>{label}</label>)}</fieldset></details>}</>}
   {!staticView&&<DiagramZoom/>}
   <div className="academy-drawing">
   <svg viewBox="0 0 720 400" role="img" aria-labelledby={id+'title '+id+'desc'}>
