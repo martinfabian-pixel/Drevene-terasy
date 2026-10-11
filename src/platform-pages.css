@@ -296,6 +296,12 @@
 .platform-admin-stock-record{padding:12px}
 .platform-article-meta{font-size:var(--ds-small)}
 .platform-product-detail .platform-price{font-size:var(--ds-body)}
+.platform-product-detail{max-width:100%;overflow-x:clip}
+.platform-product-detail :is(.platform-product-focus,.platform-product-config,.platform-product-panel,.platform-variant-options,.platform-quantity-row,.platform-specs,.platform-tabs){min-width:0;max-width:100%}
+.platform-product-detail :is(h1,h2,p,span,dd,dt,label,strong,small){overflow-wrap:anywhere}
+.platform-product-detail :is(input,select,textarea){min-width:0;max-width:100%;width:100%}
+.platform-product-detail .platform-variant-options button{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.platform-product-detail .platform-tabs{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}
 }
 .platform-page input:not([type=checkbox]):not([type=radio]),.platform-page select{min-height:46px;font-size:16px}
 .platform-page :is(h1,h2,h3){letter-spacing:0}
