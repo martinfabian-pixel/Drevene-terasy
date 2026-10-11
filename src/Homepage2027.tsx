@@ -10,6 +10,7 @@ const links = [
   { label: 'Príslušenstvo', to: '/prislusenstvo' },
   { label: 'Plánovač', to: '/planovac' },
   { label: 'Realizácie', to: '/realizacie' },
+  { label: 'Pod povrchom', to: '/pod-povrchom' },
   { label: 'Poradňa', to: '/poradna' },
   { label: 'O nás', to: '/o-nas' },
   { label: 'Kontakt', to: '/kontakt' },
