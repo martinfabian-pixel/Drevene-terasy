@@ -130,7 +130,7 @@ try{
   const staticContext=await browser.newContext({viewport:{width,height},isMobile:width<500,hasTouch:width<900,locale:'sk-SK',javaScriptEnabled:false});
   const staticPage=await staticContext.newPage();latestPage=staticPage;staticPage.setDefaultTimeout(15_000);
   for(const topic of journeys)for(const step of topic.steps)await check(name+' static '+topic.id+'/'+step.id,async()=>{
-   const suffix='academy-guides/'+topic.id+'/'+step.id+'/';const response=await staticPage.goto(origin+suffix+'index.html',{waitUntil:'networkidle'});assert.equal(response.status(),200);await staticPage.waitForFunction(()=>{const s=getComputedStyle(document.documentElement);return Boolean(s.getPropertyValue('--ds-paper').trim()&&s.getPropertyValue('--ds-ink').trim())},{timeout:10000});
+   const suffix='academy-guides/'+topic.id+'/'+step.id+'/';const response=await staticPage.goto(origin+suffix+'index.html',{waitUntil:'networkidle'});assert.equal(response.status(),200);await poll(()=>staticPage.evaluate(()=>{const s=getComputedStyle(document.documentElement);return Boolean(s.getPropertyValue('--ds-paper').trim()&&s.getPropertyValue('--ds-ink').trim())}),true);
    const result=await assertAppearance(staticPage,name+' static '+topic.id+'/'+step.id);assert.ok((await staticPage.locator('main').innerText()).length>250);assert.ok(await staticPage.locator('.sources p').count()>0);assert.equal(await staticPage.locator('link[rel="canonical"]').getAttribute('href'),'https://martinfabian-pixel.github.io/Drevene-terasy/'+suffix);
    report.routes.push({name,width,route:suffix,static:true,passed:true,overflow:result.overflow});return {withoutJavaScript:true};
   });await staticContext.close();latestPage=page;
