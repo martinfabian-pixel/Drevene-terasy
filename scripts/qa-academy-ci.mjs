@@ -13,7 +13,7 @@ const report={checks:[],errors:[],pdf:{}};
 let browser;
 try{
  browser=await chromium.launch({headless:true});
- const pdfPage=await browser.newPage();await pdfPage.goto(origin+route+'?print=1');await pdfPage.getByTestId('academy-manual').waitFor();await pdfPage.evaluate(()=>document.fonts.ready);
+ const pdfPage=await browser.newPage({locale:'sk-SK'});await pdfPage.goto(origin+route+'?print=1');await pdfPage.getByTestId('academy-manual').waitFor();await pdfPage.evaluate(()=>document.fonts.ready);
  assert.equal(await pdfPage.locator('tbody tr').count(),51);
  const pdfPath=resolve(dist,'manuals/pod-povrchom-04.pdf');
  await pdfPage.pdf({path:pdfPath,format:'A4',printBackground:true,preferCSSPageSize:true,displayHeaderFooter:true,headerTemplate:'<div></div>',footerTemplate:'<div style="font-size:8px;width:100%;padding:0 15mm;color:#444;display:flex;justify-content:space-between"><span>DREVENÉ TERASY / POD POVRCHOM / 04 · 2026-10-11.1</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>',tagged:true,outline:true});
