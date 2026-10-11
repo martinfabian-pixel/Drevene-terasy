@@ -1,0 +1,40 @@
+name: FIXINGGROUP / Read-only visual reference audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/qa-fixing-reference-ci.mjs
+      - .github/workflows/fixing-reference-audit.yml
+permissions:
+  contents: read
+concurrency:
+  group: fixing-reference-audit
+  cancel-in-progress: true
+jobs:
+  reference:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: '24'
+      - name: Install pinned browser dependency
+        run: npm install --no-audit --no-fund
+      - name: Install Chromium and PDF visual inspection utilities
+        run: |
+          npx playwright install --with-deps chromium
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+      - name: Inspect public reference without changing or publishing it
+        run: node scripts/qa-fixing-reference-ci.mjs
+        env:
+          FIXING_REFERENCE_EXPORT: '1'
+      - name: Save private QA screenshots, style metadata and optional PDF review
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: fixing-reference-visual-audit
+          path: qa/ci-fixing-reference
+          retention-days: 14
