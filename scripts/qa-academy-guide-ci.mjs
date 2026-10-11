@@ -173,27 +173,40 @@ try{
   }
   assert.equal(Object.values(topicHistory).reduce((n,t)=>n+t.visited.length,0),39,'All 39 source-driven guide steps');
 
-  // B and E: Direct mobile deep link, double joist explanation, history and reload.
-  await page.goto(origin+topicRoute('podkonstrukcia')+'?step=celne-spoje');await waitGuide(page,'podkonstrukcia','celne-spoje');
+  // B: User finds the double joist explanation through the real beginner entry.
+  await page.goto(origin+root);await entries.first().waitFor();
+  await entries.filter({hasText:'Postaviť terasu'}).click();await waitGuide(page,'terasa');
+  await page.locator('.ag-contents>summary').click();
+  await page.getByRole('link',{name:/Čelné spoje — dve podpory/}).click();
+  await waitGuide(page,'podkonstrukcia','celne-spoje');
   assert.ok((await page.getByTestId('guide-step').innerText()).toLowerCase().includes('kon'));
-  await noOverflow(page,name+' direct joint');await shot(page,name,'joint');await testMainInteraction(page);
+  await noOverflow(page,name+' joint entry');await shot(page,name,'joint');await testMainInteraction(page);
+  await technicalDisclosure(page,'Double joist explanation reached from home');
+  report.scenarios.push({viewport:name,id:'B',passed:true,path:'Home → Postaviť terasu → Obsah → Čelné spoje — dve podpory → comparison and optional sources'});
+
+  // E: Independent direct mobile deep link, browser history and refresh.
+  await page.goto(origin+topicRoute('podkonstrukcia')+'?step=celne-spoje');await waitGuide(page,'podkonstrukcia','celne-spoje');
   const directURL=page.url(),directProgress=await navProgress(page);await page.getByTestId('guide-next').click();await poll(()=>stepId(page).then(id=>id!=='celne-spoje'),true);const afterId=await stepId(page);
   await page.goBack();await waitGuide(page,'podkonstrukcia','celne-spoje');assert.equal(page.url(),directURL);
   await page.goForward();await waitGuide(page,'podkonstrukcia',afterId);await page.reload();await waitGuide(page,'podkonstrukcia',afterId);
   await page.getByTestId('guide-back').click();await waitGuide(page,'podkonstrukcia','celne-spoje');assert.equal((await navProgress(page)).current,directProgress.current);
-  report.scenarios.push({viewport:name,id:'B',passed:true,path:'Direct podkonstrukcia/celne-spoje → technical illustration and optional source detail'});
   report.scenarios.push({viewport:name,id:'E',passed:true,path:'Direct step → next → browser back/forward → reload → guide back',engine:engine===webkit?'WebKit':'Chromium'});
 
   // D: User need is answered in one step, not by searching ten articles.
-  await page.goto(origin+topicRoute('drevo')+'?step=cumaru-ipe');await waitGuide(page,'drevo','cumaru-ipe');
+  await page.goto(origin+root);await entries.first().waitFor();
+  await entries.filter({hasText:'Vybrať správne drevo'}).click();await waitGuide(page,'drevo');
+  await page.locator('.ag-contents>summary').click();
+  await page.getByRole('link',{name:/Cumaru alebo Ipé\?/}).click();await waitGuide(page,'drevo','cumaru-ipe');
   const comparison=await page.getByTestId('guide-step').innerText();assert.match(comparison,/Cumaru/i);assert.match(comparison,/Ipé|Ipe/i);
   await shot(page,name,'comparison');await noOverflow(page,name+' comparison');
   await testMainInteraction(page);
   await technicalDisclosure(page,'Cumaru / Ipé');
-  report.scenarios.push({viewport:name,id:'D',passed:true,path:'Vybrať správne drevo → Cumaru / Ipé step → optional technical detail'});
+  report.scenarios.push({viewport:name,id:'D',passed:true,path:'Home → Vybrať správne drevo → Obsah → Cumaru alebo Ipé? → exact article comparison → optional technical detail'});
 
   // C: Complete library remains separate and points to the exact shared SKU.
-  await page.goto(origin+root+'/kniznica');await page.locator('.au-portal').waitFor();assert.equal(await page.locator('.au-manual-tile').count(),6);
+  await page.goto(origin+root);await entries.first().waitFor();await entries.nth(3).click();
+  await page.waitForURL(u=>u.hash.includes('/pod-povrchom/kniznica'));
+  await page.locator('.au-portal').waitFor();assert.equal(await page.locator('.au-manual-tile').count(),6);
   await page.getByRole('button',{name:/Rady a skúsenosti/}).click();await poll(()=>page.locator('.au-article-list>a').count(),10);
   await page.getByRole('link',{name:/Technický katalóg/}).last().click();await page.locator('.au-catalog-list').waitFor();
   assert.equal(await page.locator('.au-catalog-list>button').count(),51);assert.equal(await page.locator('.au-catalog-list>button').filter({hasText:'Neoverené'}).count(),8);
@@ -201,7 +214,7 @@ try{
   await page.locator('.au-catalog-list>button').click();const inspector=page.getByTestId('rule-inspector');await inspector.waitFor();
   assert.match(await inspector.innerText(),/450 mm/);assert.equal(await inspector.locator('dl>div').count(),17);
   const planner=await inspector.getByRole('link',{name:'Plánovať 55987/0230'}).getAttribute('href');assert.ok(planner.includes('product=')&&planner.includes('&variant='));
-  await noOverflow(page,name+' technical SKU');report.scenarios.push({viewport:name,id:'C',passed:true,path:'Technická knižnica → exact SKU 55987/0230 → shared 450 mm rule, 17 fields and exact planner variant'});
+  await noOverflow(page,name+' technical SKU');report.scenarios.push({viewport:name,id:'C',passed:true,path:'Home → Technické podklady pre profesionálov → Technická knižnica → catalogue → exact SKU 55987/0230 → shared 450 mm rule, 17 fields and exact planner variant'});
   for(const id of ['01','02','03','04','05','06']){
    const response=await context.request.get(origin+'manuals/pod-povrchom-'+id+'.pdf');assert.equal(response.status(),200,'Existing PDF '+id);assert.equal((await response.body()).subarray(0,5).toString(),'%PDF-');
    if(name==='desktop')report.pdf.push({id,status:response.status(),bytes:(await response.body()).length});
